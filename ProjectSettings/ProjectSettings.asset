@@ -226,3 +226,4 @@ PlayerSettings:
   androidEnableBanner: 1
   androidUseLowLatencyAudioOutput: 1
   androidStartInFullscreen: 1
+  activeInputHandler: 2
