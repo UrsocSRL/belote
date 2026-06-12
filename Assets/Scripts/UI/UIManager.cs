@@ -56,9 +56,31 @@ namespace BeloteFreeze.UI
         public GameObject LastTrickPanel;
         public Text       LastTrickText;
 
+        [Header("Decor")]
+        public CardArtSet CardArt;
+        public Image      BackgroundImage;
+        public Image      TableImage;
+        public Image[]    AIAvatars; // [0]=Ouest [1]=Nord [2]=Est
+
         readonly List<GameObject> _humanCardObjects = new();
         List<Card>      _currentHumanHand = new();
         List<TrickPlay> _lastTrickData    = new();
+
+        void Awake()
+        {
+            CardView.ArtSet = CardArt;
+            if (CardArt != null)
+            {
+                if (BackgroundImage != null && CardArt.Background != null) BackgroundImage.sprite = CardArt.Background;
+                if (TableImage != null && CardArt.Table != null) TableImage.sprite = CardArt.Table;
+                if (AIAvatars != null)
+                {
+                    Sprite[] avatarSeq = { CardArt.AvatarMale, CardArt.AvatarFemale, CardArt.AvatarMale };
+                    for (int i = 0; i < AIAvatars.Length && i < avatarSeq.Length; i++)
+                        if (AIAvatars[i] != null && avatarSeq[i] != null) AIAvatars[i].sprite = avatarSeq[i];
+                }
+            }
+        }
 
         void Start()
         {
@@ -258,7 +280,11 @@ namespace BeloteFreeze.UI
         {
             if (!container || !CardBackPrefab) return;
             foreach (Transform c in container) Destroy(c.gameObject);
-            for (int i = 0; i < count; i++) Instantiate(CardBackPrefab, container);
+            for (int i = 0; i < count; i++)
+            {
+                var go = Instantiate(CardBackPrefab, container);
+                go.GetComponent<CardView>()?.SetCardBack();
+            }
         }
 
         void PlaceCardOnTable(int seat, Card card)
