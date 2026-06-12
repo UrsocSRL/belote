@@ -9,8 +9,8 @@ namespace BeloteFreeze.UI
 {
     /// <summary>
     /// GameManager — Bible Demo V0.1
-    /// Chef d'orchestre : distribution, prise d'atout, déroulement des plis,
-    /// calcul des scores. Aucun bouton Jouer : une carte touchée est immédiatement jouée.
+    /// Chef d'orchestre : distribution, prise d'atout, déroulement des plis, scores.
+    /// Aucun bouton Jouer : une carte touchée est immédiatement jouée.
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -19,24 +19,24 @@ namespace BeloteFreeze.UI
         [Header("References")]
         public UIManager UIManager;
 
-        // ── Core objects ─────────────────────────────────────────────────────
-        private readonly Deck          _deck         = new();
-        private readonly Player[]      _players      = new Player[4];
-        private readonly TrickManager  _trickMgr     = new();
-        private readonly TrumpManager  _trumpMgr     = new();
-        private readonly ScoreManager  _scoreMgr     = new();
-        private readonly BeloteTracker _beloteTracker= new();
-        private readonly AIPlayer      _ai           = new();
-        public  readonly GameState     State         = new();
-
-        // ── AI delay ─────────────────────────────────────────────────────────
         [Header("Settings")]
-        [Tooltip("Délai en secondes entre chaque action IA")]
+        [Tooltip("Délai IA en secondes")]
         public float AIDelay = 0.6f;
 
+        // ── Objets métier ─────────────────────────────────────────────────────
+        private readonly Deck          _deck          = new();
+        private readonly Player[]      _players       = new Player[4];
+        private readonly TrickManager  _trickMgr      = new();
+        private readonly TrumpManager  _trumpMgr      = new();
+        private readonly ScoreManager  _scoreMgr      = new();
+        private readonly BeloteTracker _beloteTracker = new();
+        private readonly AIPlayer      _ai            = new();
+        public  readonly GameState     State          = new();
+
+        // ── Contrôle de flux ─────────────────────────────────────────────────
         private bool _waitingForHuman;
 
-        // ────────────────────────────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────────────
         void Awake()
         {
             if (Instance != null) { Destroy(gameObject); return; }
@@ -57,7 +57,7 @@ namespace BeloteFreeze.UI
             _players[3] = new Player(PlayerSeat.East,  isHuman: false);
         }
 
-        // ── Nouvelle partie / manche ─────────────────────────────────────────
+        // ── Nouvelle partie ───────────────────────────────────────────────────
         public void StartNewGame()
         {
             _scoreMgr.Reset();
@@ -65,6 +65,7 @@ namespace BeloteFreeze.UI
             StartNewHand();
         }
 
+        // ── Nouvelle manche ───────────────────────────────────────────────────
         public void StartNewHand()
         {
             State.ResetRound();
@@ -80,12 +81,12 @@ namespace BeloteFreeze.UI
             StartCoroutine(TrumpSelectionLoop());
         }
 
-        // ── PRISE D'ATOUT ────────────────────────────────────────────────────
+        // ── PRISE D'ATOUT ─────────────────────────────────────────────────────
         IEnumerator TrumpSelectionLoop()
         {
             while (!_trumpMgr.IsComplete)
             {
-                int asker = _trumpMgr.CurrentAskerSeat;
+                int  asker   = _trumpMgr.CurrentAskerSeat;
                 bool isHuman = _players[asker].IsHuman;
 
                 UIManager?.OnTrumpAsk(asker, _trumpMgr.Phase, _trumpMgr.TrumpCard);
@@ -112,10 +113,10 @@ namespace BeloteFreeze.UI
                 yield break;
             }
 
-            // Atout choisi
-            State.Trump      = _trumpMgr.ChosenTrump!.Value;
-            State.TakerSeat  = _trumpMgr.TakerSeat;
-            State.TakerTeam  = _players[_trumpMgr.TakerSeat].TeamIndex;
+            // Atout validé
+            State.Trump           = _trumpMgr.ChosenTrump!.Value;
+            State.TakerSeat       = _trumpMgr.TakerSeat;
+            State.TakerTeam       = _players[_trumpMgr.TakerSeat].TeamIndex;
             State.TrickLeaderSeat = (State.DealerSeat + 1) % 4;
 
             _trickMgr.Reset(State.Trump);
@@ -148,32 +149,20 @@ namespace BeloteFreeze.UI
             }
         }
 
-        // ── Décisions humaines prise d'atout ─────────────────────────────────
-        public void HumanTake()
-        {
-            _trumpMgr.Take(0);
-            _waitingForHuman = false;
-        }
+        // ── Décisions humaines — prise d'atout ────────────────────────────────
+        public void HumanTake()              { _trumpMgr.Take(0);            _waitingForHuman = false; }
+        public void HumanTakeSuit(Suit suit) { _trumpMgr.TakeSuit(0, suit); _waitingForHuman = false; }
+        public void HumanPass()              { _trumpMgr.Pass();             _waitingForHuman = false; }
 
-        public void HumanTakeSuit(Suit suit)
-        {
-            _trumpMgr.TakeSuit(0, suit);
-            _waitingForHuman = false;
-        }
-
-        public void HumanPass()
-        {
-            _trumpMgr.Pass();
-            _waitingForHuman = false;
-        }
-
-        // ── BOUCLE DE JEU ────────────────────────────────────────────────────
+        // ── BOUCLE DE JEU ─────────────────────────────────────────────────────
         IEnumerator PlayLoop()
         {
-            while (_players[0].Hand.Count > 0)
+            // FIX ligne 173 — condition robuste : 8 plis, peu importe la synchro des mains
+            while (_trickMgr.TrickCount < 8)
             {
                 int leader = State.TrickLeaderSeat;
                 State.CurrentPlayerSeat = leader;
+                State.Phase = GamePhase.Playing;
 
                 // 4 joueurs jouent dans l'ordre
                 for (int i = 0; i < 4; i++)
@@ -184,7 +173,6 @@ namespace BeloteFreeze.UI
 
                     if (_players[seat].IsHuman)
                     {
-                        // Montrer les cartes autorisées — Bible Demo : carte touchée = jouée immédiatement
                         var ok = _trickMgr.GetAllowedCards(_players[0]);
                         UIManager?.HighlightAllowedCards(ok);
                         _waitingForHuman = true;
@@ -193,16 +181,17 @@ namespace BeloteFreeze.UI
                     else
                     {
                         yield return new WaitForSeconds(AIDelay);
-                        var ok = _trickMgr.GetAllowedCards(_players[seat]);
+                        var ok   = _trickMgr.GetAllowedCards(_players[seat]);
                         var card = _ai.ChooseCard(_players[seat], ok, _trickMgr.CurrentTrick);
                         ExecutePlay(seat, card);
                     }
                 }
 
                 // Résolution du pli
+                State.Phase = GamePhase.TrickEnd;
                 yield return new WaitForSeconds(0.4f);
-                var (winnerSeat, pts) = _trickMgr.ResolveTrick();
 
+                var (winnerSeat, pts) = _trickMgr.ResolveTrick();
                 int winnerTeam = _players[winnerSeat].TeamIndex;
                 State.RoundPoints[winnerTeam] += pts;
                 State.TricksWon[winnerSeat]++;
@@ -212,7 +201,6 @@ namespace BeloteFreeze.UI
                 yield return new WaitForSeconds(0.5f);
             }
 
-            // Fin de manche
             yield return StartCoroutine(EndHand());
         }
 
@@ -224,7 +212,7 @@ namespace BeloteFreeze.UI
         {
             if (!_waitingForHuman) return;
             var ok = _trickMgr.GetAllowedCards(_players[0]);
-            if (!ok.Contains(card)) return; // carte non autorisée
+            if (!ok.Contains(card)) return;
 
             ExecutePlay(0, card);
             _waitingForHuman = false;
@@ -232,7 +220,6 @@ namespace BeloteFreeze.UI
 
         void ExecutePlay(int seat, Card card)
         {
-            // Mémoriser la couleur d'entame
             Suit leadSuit = _trickMgr.CurrentTrick.Count > 0
                 ? _trickMgr.CurrentTrick[0].Card.Suit
                 : card.Suit;
@@ -260,21 +247,38 @@ namespace BeloteFreeze.UI
             int usTotal   = State.TricksWon[0] + State.TricksWon[2];
             int themTotal = State.TricksWon[1] + State.TricksWon[3];
 
-            bool beloteRebelote = _beloteTracker.IsComplete;
-            int  beloteTeam     = _beloteTracker.BeloteTeam;
-
             var result = _scoreMgr.ComputeRound(
                 State.RoundPoints[0], State.RoundPoints[1],
                 usTotal, themTotal,
                 State.TakerTeam,
-                beloteRebelote, beloteTeam
+                _beloteTracker.IsComplete,
+                _beloteTracker.BeloteTeam
             );
 
             UIManager?.OnRoundEnd(result, _scoreMgr.TotalScoreUs, _scoreMgr.TotalScoreThem);
             yield return null;
         }
 
-        // ── NOUVELLE MANCHE (appelée par UIManager) ───────────────────────────
+        // ── API publique pour UIManager ───────────────────────────────────────
+
+        /// <summary>
+        /// FIX — Expose le nombre de cartes d'un joueur IA (pour RenderAIBack).
+        /// </summary>
+        public int GetPlayerHandCount(int seat)
+        {
+            if (seat < 0 || seat >= _players.Length) return 0;
+            return _players[seat].Hand.Count;
+        }
+
+        /// <summary>
+        /// FIX — Expose le dernier pli pour le bouton LastTrick.
+        /// </summary>
+        public List<TrickPlay> GetLastTrick()
+        {
+            return _trickMgr.LastTrick ?? new List<TrickPlay>();
+        }
+
+        // ── Nouvelle manche (appelée par UIManager) ───────────────────────────
         public void OnNextHandRequested()
         {
             State.DealerSeat = (State.DealerSeat + 1) % 4;
