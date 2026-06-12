@@ -55,7 +55,10 @@ public static class SceneBuilder
         cv.sortingOrder = 0;
         var sc = cvGo.AddComponent<CanvasScaler>();
         sc.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        sc.referenceResolution = new Vector2(1080, 1920);
+        // Reference resolution divisee par 2 (meme ratio 9:16) : tous les elements
+        // de l'UI (cartes, textes, avatars...) s'affichent ~2x plus grands a l'ecran
+        // sans changer la disposition relative.
+        sc.referenceResolution = new Vector2(540, 960);
         sc.matchWidthOrHeight  = 0.5f;
         cvGo.AddComponent<GraphicRaycaster>();
         var cvT = cvGo.transform;
