@@ -19,7 +19,6 @@ namespace BeloteFreeze.UI
         [Header("Colors")]
         public Color RedSuitColor   = new Color(0.80f, 0.10f, 0.10f);
         public Color BlackSuitColor = new Color(0.10f, 0.10f, 0.10f);
-        public Color TrumpBgColor   = new Color(1f, 0.98f, 0.85f);
         public Color NormalBgColor  = Color.white;
 
         /// <summary>
@@ -29,7 +28,6 @@ namespace BeloteFreeze.UI
 
         public void SetCard(Card card, Suit trump)
         {
-            bool isTrump = card.Suit == trump;
             var sprite = ArtSet != null ? ArtSet.GetCardSprite(card.Suit, card.Rank) : null;
 
             if (CardFaceImage != null && sprite != null)
@@ -50,9 +48,9 @@ namespace BeloteFreeze.UI
             }
 
             if (CardBackground != null)
-                CardBackground.color = isTrump ? TrumpBgColor : NormalBgColor;
+                CardBackground.color = NormalBgColor;
             if (TrumpHighlight != null)
-                TrumpHighlight.gameObject.SetActive(isTrump);
+                TrumpHighlight.gameObject.SetActive(false);
         }
 
         /// <summary>

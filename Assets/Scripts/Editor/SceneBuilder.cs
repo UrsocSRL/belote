@@ -75,21 +75,24 @@ public static class SceneBuilder
 
         // ── IA HAUT (Nord) ─────────────────────────────────────────────────────
         var aiTopZ  = Pnl("AITopZone",  cvT, new Vector2(900,220), ATop, new Vector2(0,-165), Color.clear);
-                      Lbl("LblNord","Nord", aiTopZ.transform, new Vector2(0,88), 20, C_AILBL, false);
-        var avNord  = Img("AvatarNord", aiTopZ.transform, new Vector2(-400,24), new Vector2(72,72));
-        var aiTopH  = Ctr("AITopHand",  aiTopZ.transform, Vector2.zero, new Vector2(820,160),  true);
+        var avNordBg = Pnl("AvatarNordBg", aiTopZ.transform, new Vector2(108,108), AMid, new Vector2(-380,10), C_PANLT);
+                      Lbl("LblNord","Nord", avNordBg.transform, new Vector2(0,76), 20, C_AILBL, false);
+        var avNord  = Img("AvatarNord", avNordBg.transform, Vector2.zero, new Vector2(96,96));
+        var aiTopH  = FanContainer("AITopHand", aiTopZ.transform, new Vector2(50,0), new Vector2(760,160), false, 60f, 14f, 24f);
 
         // ── IA GAUCHE (Ouest) ──────────────────────────────────────────────────
-        var aiLftZ  = Pnl("AILeftZone",  cvT, new Vector2(150,500), ALeft, new Vector2(80,0),  Color.clear);
-                      Lbl("LblOuest","Ouest", aiLftZ.transform, new Vector2(0,215), 20, C_AILBL, false);
-        var avOuest = Img("AvatarOuest", aiLftZ.transform, new Vector2(0,250), new Vector2(72,72));
-        var aiLftH  = Ctr("AILeftHand",  aiLftZ.transform, Vector2.zero, new Vector2(120,460),  false);
+        var aiLftZ  = Pnl("AILeftZone",  cvT, new Vector2(160,520), ALeft, new Vector2(90,0),  Color.clear);
+        var avOuestBg = Pnl("AvatarOuestBg", aiLftZ.transform, new Vector2(108,108), AMid, new Vector2(0,225), C_PANLT);
+                      Lbl("LblOuest","Ouest", avOuestBg.transform, new Vector2(0,76), 20, C_AILBL, false);
+        var avOuest = Img("AvatarOuest", avOuestBg.transform, Vector2.zero, new Vector2(96,96));
+        var aiLftH  = FanContainer("AILeftHand", aiLftZ.transform, new Vector2(0,-60), new Vector2(140,400), true, 58f, 14f, 22f);
 
         // ── IA DROITE (Est) ────────────────────────────────────────────────────
-        var aiRgtZ  = Pnl("AIRightZone", cvT, new Vector2(150,500), ARight, new Vector2(-80,0), Color.clear);
-                      Lbl("LblEst","Est", aiRgtZ.transform, new Vector2(0,215), 20, C_AILBL, false);
-        var avEst   = Img("AvatarEst", aiRgtZ.transform, new Vector2(0,250), new Vector2(72,72));
-        var aiRgtH  = Ctr("AIRightHand", aiRgtZ.transform, Vector2.zero, new Vector2(120,460),  false);
+        var aiRgtZ  = Pnl("AIRightZone", cvT, new Vector2(160,520), ARight, new Vector2(-90,0), Color.clear);
+        var avEstBg = Pnl("AvatarEstBg", aiRgtZ.transform, new Vector2(108,108), AMid, new Vector2(0,225), C_PANLT);
+                      Lbl("LblEst","Est", avEstBg.transform, new Vector2(0,76), 20, C_AILBL, false);
+        var avEst   = Img("AvatarEst", avEstBg.transform, Vector2.zero, new Vector2(96,96));
+        var aiRgtH  = FanContainer("AIRightHand", aiRgtZ.transform, new Vector2(0,-60), new Vector2(140,400), true, 58f, 14f, 22f);
 
         // ── TABLE (4 slots) ────────────────────────────────────────────────────
         // table.png est un ovale "paysage" (plus large que haut). En portrait, on le
@@ -419,34 +422,17 @@ public static class SceneBuilder
         return go;
     }
 
-    static GameObject Ctr(string name, Transform parent, Vector2 pos, Vector2 size, bool horiz)
+    static GameObject FanContainer(string name, Transform parent, Vector2 pos, Vector2 size,
+                                    bool vertical = false, float spacing = 76f, float maxAngle = 16f, float arcHeight = 40f)
     {
         var go = new GameObject(name); go.transform.SetParent(parent,false);
         var rt = go.AddComponent<RectTransform>();
         rt.anchorMin = rt.anchorMax = AMid; rt.anchoredPosition = pos; rt.sizeDelta = size;
-        if (horiz)
-        {
-            var h = go.AddComponent<HorizontalLayoutGroup>();
-            h.spacing=4; h.childAlignment=TextAnchor.MiddleCenter;
-            h.childControlWidth=false; h.childControlHeight=false;
-            h.childForceExpandWidth=false; h.childForceExpandHeight=false;
-        }
-        else
-        {
-            var v = go.AddComponent<VerticalLayoutGroup>();
-            v.spacing=4; v.childAlignment=TextAnchor.MiddleCenter;
-            v.childControlWidth=false; v.childControlHeight=false;
-            v.childForceExpandWidth=false; v.childForceExpandHeight=false;
-        }
-        return go;
-    }
-
-    static GameObject FanContainer(string name, Transform parent, Vector2 pos, Vector2 size)
-    {
-        var go = new GameObject(name); go.transform.SetParent(parent,false);
-        var rt = go.AddComponent<RectTransform>();
-        rt.anchorMin = rt.anchorMax = AMid; rt.anchoredPosition = pos; rt.sizeDelta = size;
-        go.AddComponent<CardFanLayout>();
+        var fan = go.AddComponent<CardFanLayout>();
+        fan.Vertical   = vertical;
+        fan.CardSpacing = spacing;
+        fan.MaxAngle    = maxAngle;
+        fan.ArcHeight   = arcHeight;
         return go;
     }
 

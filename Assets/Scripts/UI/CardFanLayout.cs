@@ -9,14 +9,17 @@ namespace BeloteFreeze.UI
     [RequireComponent(typeof(RectTransform))]
     public class CardFanLayout : MonoBehaviour
     {
-        [Tooltip("Decalage horizontal entre deux cartes (chevauchement si < largeur de carte)")]
+        [Tooltip("Decalage entre deux cartes (chevauchement si < taille de carte)")]
         public float CardSpacing = 76f;
 
         [Tooltip("Angle max (en degres) applique aux cartes des extremites")]
         public float MaxAngle = 16f;
 
-        [Tooltip("Hauteur de l'arc (les cartes du centre sont plus hautes)")]
+        [Tooltip("Hauteur de l'arc (les cartes du centre sont plus avancees)")]
         public float ArcHeight = 40f;
+
+        [Tooltip("Eventail vertical (mains Ouest/Est) au lieu d'horizontal (mains Sud/Nord)")]
+        public bool Vertical = false;
 
         void OnTransformChildrenChanged() => Arrange();
 
@@ -27,8 +30,8 @@ namespace BeloteFreeze.UI
             int count = transform.childCount;
             if (count == 0) return;
 
-            float totalWidth = (count - 1) * CardSpacing;
-            float startX = -totalWidth / 2f;
+            float total = (count - 1) * CardSpacing;
+            float start = -total / 2f;
 
             for (int i = 0; i < count; i++)
             {
@@ -37,12 +40,20 @@ namespace BeloteFreeze.UI
                 float t = count > 1 ? (float)i / (count - 1) : 0.5f;     // 0..1
                 float centered = (t - 0.5f) * 2f;                        // -1..1
 
-                float x = startX + i * CardSpacing;
-                float y = ArcHeight * (1f - centered * centered);        // arc vers le haut au centre
+                float along = start + i * CardSpacing;
+                float arc   = ArcHeight * (1f - centered * centered);    // arc vers le centre
                 float angle = Mathf.Lerp(MaxAngle, -MaxAngle, t);
 
-                child.anchoredPosition = new Vector2(x, y);
-                child.localRotation    = Quaternion.Euler(0, 0, angle);
+                if (Vertical)
+                {
+                    child.anchoredPosition = new Vector2(arc, along);
+                    child.localRotation    = Quaternion.Euler(0, 0, angle + 90f);
+                }
+                else
+                {
+                    child.anchoredPosition = new Vector2(along, arc);
+                    child.localRotation    = Quaternion.Euler(0, 0, angle);
+                }
             }
         }
     }
