@@ -72,12 +72,21 @@ namespace BeloteFreeze.UI
             }
         }
 
+        [Tooltip("Decalage vertical applique aux cartes jouables")]
+        public float LiftAmount = 30f;
+
+        bool _lifted;
+
         public void SetPlayable(bool playable)
         {
-            var cg  = GetComponent<CanvasGroup>();
-            if (cg  != null) cg.alpha = playable ? 1f : 0.35f;
             var btn = GetComponent<Button>();
             if (btn != null) btn.interactable = playable;
+
+            if (transform is RectTransform rt)
+            {
+                if (playable && !_lifted)      { rt.anchoredPosition += new Vector2(0, LiftAmount); _lifted = true;  }
+                else if (!playable && _lifted) { rt.anchoredPosition -= new Vector2(0, LiftAmount); _lifted = false; }
+            }
         }
 
         static bool IsRed(Suit s) => s == Suit.Hearts || s == Suit.Diamonds;

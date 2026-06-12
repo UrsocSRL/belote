@@ -101,7 +101,7 @@ public static class SceneBuilder
         // table.png est un ovale "paysage" (plus large que haut). En portrait, on le
         // pivote de 90° pour obtenir un ovale "portrait" aligné avec la disposition
         // Nord/Sud/Est/Ouest des joueurs.
-        var tableZ  = Pnl("TableZone", cvT, new Vector2(760,900), AMid, new Vector2(0,30), Color.clear);
+        var tableZ  = Pnl("TableZone", cvT, new Vector2(560,680), AMid, new Vector2(0,30), Color.clear);
         var tableImgGo = new GameObject("TableImage"); tableImgGo.transform.SetParent(tableZ.transform,false);
         var tableImgRt = tableImgGo.AddComponent<RectTransform>();
         FillRT(tableImgRt);
@@ -109,10 +109,10 @@ public static class SceneBuilder
         var tableImg = tableImgGo.AddComponent<Image>(); tableImg.raycastTarget = false; tableImg.preserveAspect = true;
         var toc = tableZ.AddComponent<TableOrientationController>();
         toc.TableImage = tableImgRt;
-        var slotS   = Slot("SlotSud",   tableZ.transform, new Vector2(   0,-290));
-        var slotO   = Slot("SlotOuest", tableZ.transform, new Vector2(-250,   0));
-        var slotN   = Slot("SlotNord",  tableZ.transform, new Vector2(   0, 290));
-        var slotE   = Slot("SlotEst",   tableZ.transform, new Vector2( 250,   0));
+        var slotS   = Slot("SlotSud",   tableZ.transform, new Vector2(   0,-220));
+        var slotO   = Slot("SlotOuest", tableZ.transform, new Vector2(-185,   0));
+        var slotN   = Slot("SlotNord",  tableZ.transform, new Vector2(   0, 220));
+        var slotE   = Slot("SlotEst",   tableZ.transform, new Vector2( 185,   0));
 
         // ── MAIN JOUEUR (Sud) ──────────────────────────────────────────────────
         var handZ   = Pnl("HandZone", cvT, new Vector2(1080,320), ABot, new Vector2(0,160), Color.clear);

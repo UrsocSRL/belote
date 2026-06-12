@@ -10,8 +10,8 @@ namespace BeloteFreeze.UI
     [RequireComponent(typeof(RectTransform))]
     public class TableOrientationController : MonoBehaviour
     {
-        public Vector2 PortraitSize  = new Vector2(760, 900);
-        public Vector2 LandscapeSize = new Vector2(1000, 620);
+        public Vector2 PortraitSize  = new Vector2(560, 680);
+        public Vector2 LandscapeSize = new Vector2(740, 460);
 
         [Tooltip("RectTransform de l'image de table (pivotee en portrait car table.png est un ovale paysage)")]
         public RectTransform TableImage;

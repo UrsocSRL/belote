@@ -169,8 +169,6 @@ namespace BeloteFreeze.UI
                 bool ok = allowedCards.Contains(_currentHumanHand[i]);
                 var cv  = go.GetComponent<CardView>();
                 if (cv != null) { cv.SetPlayable(ok); continue; }
-                var cg  = go.GetComponent<CanvasGroup>();
-                if (cg  != null) cg.alpha = ok ? 1f : 0.35f;
                 var btn = go.GetComponent<Button>();
                 if (btn != null) btn.interactable = ok;
             }
