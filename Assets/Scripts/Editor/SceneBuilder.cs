@@ -66,70 +66,76 @@ public static class SceneBuilder
         var bgImg = bgGo.AddComponent<Image>(); bgImg.raycastTarget = false; bgImg.preserveAspect = false;
 
         // ── SCORE ─────────────────────────────────────────────────────────────
-        var scoreP  = Pnl("ScorePanel", cvT, new Vector2(1080,80), ATop, new Vector2(0,-40), C_PANEL);
-        var tUs     = Lbl("ScoreUs",   "0",     scoreP.transform, new Vector2(-200,0),  28, C_WHITE, true);
-        var tThem   = Lbl("ScoreThem", "0",     scoreP.transform, new Vector2( 200,0),  28, C_WHITE, true);
-        var tTrump  = Lbl("TrumpInd",  "",      scoreP.transform, new Vector2(0, 14),   18, C_GOLD,  true);
-                      Lbl("LblNous","Nous",     scoreP.transform, new Vector2(-200,-26),13, new Color(.6f,.9f,.6f), false);
-                      Lbl("LblEux", "Eux",      scoreP.transform, new Vector2( 200,-26),13, new Color(.9f,.6f,.6f), false);
+        var scoreP  = Pnl("ScorePanel", cvT, new Vector2(1080,90), ATop, new Vector2(0,-45), C_PANEL);
+        var tUs     = Lbl("ScoreUs",   "0",     scoreP.transform, new Vector2(-200,0),  34, C_WHITE, true);
+        var tThem   = Lbl("ScoreThem", "0",     scoreP.transform, new Vector2( 200,0),  34, C_WHITE, true);
+        var tTrump  = Lbl("TrumpInd",  "",      scoreP.transform, new Vector2(0, 16),   22, C_GOLD,  true);
+                      Lbl("LblNous","Nous",     scoreP.transform, new Vector2(-200,-28),18, new Color(.6f,.9f,.6f), false);
+                      Lbl("LblEux", "Eux",      scoreP.transform, new Vector2( 200,-28),18, new Color(.9f,.6f,.6f), false);
 
         // ── IA HAUT (Nord) ─────────────────────────────────────────────────────
-        var aiTopZ  = Pnl("AITopZone",  cvT, new Vector2(760,180), ATop, new Vector2(0,-145), Color.clear);
-                      Lbl("LblNord","Nord", aiTopZ.transform, new Vector2(0,74), 13, C_AILBL, false);
-        var avNord  = Img("AvatarNord", aiTopZ.transform, new Vector2(-350,20), new Vector2(56,56));
-        var aiTopH  = Ctr("AITopHand",  aiTopZ.transform, Vector2.zero, new Vector2(740,140),  true);
+        var aiTopZ  = Pnl("AITopZone",  cvT, new Vector2(900,220), ATop, new Vector2(0,-165), Color.clear);
+                      Lbl("LblNord","Nord", aiTopZ.transform, new Vector2(0,88), 20, C_AILBL, false);
+        var avNord  = Img("AvatarNord", aiTopZ.transform, new Vector2(-400,24), new Vector2(72,72));
+        var aiTopH  = Ctr("AITopHand",  aiTopZ.transform, Vector2.zero, new Vector2(820,160),  true);
 
         // ── IA GAUCHE (Ouest) ──────────────────────────────────────────────────
-        var aiLftZ  = Pnl("AILeftZone",  cvT, new Vector2(130,460), ALeft, new Vector2(68,0),  Color.clear);
-                      Lbl("LblOuest","Ouest", aiLftZ.transform, new Vector2(0,195), 13, C_AILBL, false);
-        var avOuest = Img("AvatarOuest", aiLftZ.transform, new Vector2(0,225), new Vector2(56,56));
-        var aiLftH  = Ctr("AILeftHand",  aiLftZ.transform, Vector2.zero, new Vector2(100,420),  false);
+        var aiLftZ  = Pnl("AILeftZone",  cvT, new Vector2(150,500), ALeft, new Vector2(80,0),  Color.clear);
+                      Lbl("LblOuest","Ouest", aiLftZ.transform, new Vector2(0,215), 20, C_AILBL, false);
+        var avOuest = Img("AvatarOuest", aiLftZ.transform, new Vector2(0,250), new Vector2(72,72));
+        var aiLftH  = Ctr("AILeftHand",  aiLftZ.transform, Vector2.zero, new Vector2(120,460),  false);
 
         // ── IA DROITE (Est) ────────────────────────────────────────────────────
-        var aiRgtZ  = Pnl("AIRightZone", cvT, new Vector2(130,460), ARight, new Vector2(-68,0), Color.clear);
-                      Lbl("LblEst","Est", aiRgtZ.transform, new Vector2(0,195), 13, C_AILBL, false);
-        var avEst   = Img("AvatarEst", aiRgtZ.transform, new Vector2(0,225), new Vector2(56,56));
-        var aiRgtH  = Ctr("AIRightHand", aiRgtZ.transform, Vector2.zero, new Vector2(100,420),  false);
+        var aiRgtZ  = Pnl("AIRightZone", cvT, new Vector2(150,500), ARight, new Vector2(-80,0), Color.clear);
+                      Lbl("LblEst","Est", aiRgtZ.transform, new Vector2(0,215), 20, C_AILBL, false);
+        var avEst   = Img("AvatarEst", aiRgtZ.transform, new Vector2(0,250), new Vector2(72,72));
+        var aiRgtH  = Ctr("AIRightHand", aiRgtZ.transform, Vector2.zero, new Vector2(120,460),  false);
 
         // ── TABLE (4 slots) ────────────────────────────────────────────────────
-        var tableZ  = Pnl("TableZone", cvT, new Vector2(840,740), AMid, new Vector2(0,55), Color.clear);
+        // table.png est un ovale "paysage" (plus large que haut). En portrait, on le
+        // pivote de 90° pour obtenir un ovale "portrait" aligné avec la disposition
+        // Nord/Sud/Est/Ouest des joueurs.
+        var tableZ  = Pnl("TableZone", cvT, new Vector2(760,900), AMid, new Vector2(0,30), Color.clear);
         var tableImgGo = new GameObject("TableImage"); tableImgGo.transform.SetParent(tableZ.transform,false);
-        FillRT(tableImgGo.AddComponent<RectTransform>());
+        var tableImgRt = tableImgGo.AddComponent<RectTransform>();
+        FillRT(tableImgRt);
+        tableImgRt.localEulerAngles = new Vector3(0,0,90);
         var tableImg = tableImgGo.AddComponent<Image>(); tableImg.raycastTarget = false; tableImg.preserveAspect = true;
-        tableZ.AddComponent<TableOrientationController>();
-        var slotS   = Slot("SlotSud",   tableZ.transform, new Vector2(   0,-230));
-        var slotO   = Slot("SlotOuest", tableZ.transform, new Vector2(-290,   0));
-        var slotN   = Slot("SlotNord",  tableZ.transform, new Vector2(   0, 230));
-        var slotE   = Slot("SlotEst",   tableZ.transform, new Vector2( 290,   0));
+        var toc = tableZ.AddComponent<TableOrientationController>();
+        toc.TableImage = tableImgRt;
+        var slotS   = Slot("SlotSud",   tableZ.transform, new Vector2(   0,-290));
+        var slotO   = Slot("SlotOuest", tableZ.transform, new Vector2(-250,   0));
+        var slotN   = Slot("SlotNord",  tableZ.transform, new Vector2(   0, 290));
+        var slotE   = Slot("SlotEst",   tableZ.transform, new Vector2( 250,   0));
 
         // ── MAIN JOUEUR (Sud) ──────────────────────────────────────────────────
-        var handZ   = Pnl("HandZone", cvT, new Vector2(1080,260), ABot, new Vector2(0,135), Color.clear);
-        var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,240));
+        var handZ   = Pnl("HandZone", cvT, new Vector2(1080,320), ABot, new Vector2(0,160), Color.clear);
+        var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,300));
 
         // ── INFO BAR ───────────────────────────────────────────────────────────
-        var infoP   = Pnl("InfoBar", cvT, new Vector2(790,44), ABot, new Vector2(0,316), C_PANLT);
-        var tInfo   = Lbl("InfoBarText","A vous de jouer", infoP.transform, Vector2.zero, 16, C_WHITE, false);
+        var infoP   = Pnl("InfoBar", cvT, new Vector2(790,50), ABot, new Vector2(0,356), C_PANLT);
+        var tInfo   = Lbl("InfoBarText","A vous de jouer", infoP.transform, Vector2.zero, 20, C_WHITE, false);
 
         // ── BOUTON DERNIER PLI ─────────────────────────────────────────────────
         var lastBt  = Btn("LastTrickBtn", cvT, "Dernier pli",
-                          new Vector2(168,44), ABotL, new Vector2(92,316), C_PANLT);
+                          new Vector2(180,50), ABotL, new Vector2(98,356), C_PANLT);
 
         // ── PANNEAU DERNIER PLI ────────────────────────────────────────────────
-        var lpPnl   = Pnl("LastTrickPanel", cvT, new Vector2(540,196), AMid, Vector2.zero, C_PANEL);
-        var tLPTxt  = Lbl("LastTrickText","", lpPnl.transform, Vector2.zero, 15, C_WHITE, false);
+        var lpPnl   = Pnl("LastTrickPanel", cvT, new Vector2(560,210), AMid, Vector2.zero, C_PANEL);
+        var tLPTxt  = Lbl("LastTrickText","", lpPnl.transform, Vector2.zero, 18, C_WHITE, false);
         lpPnl.SetActive(false);
 
         // ── PANNEAU PRISE D'ATOUT ──────────────────────────────────────────────
-        var tPnl    = Pnl("TrumpPanel", cvT, new Vector2(540,360), AMid, Vector2.zero, C_PANEL);
+        var tPnl    = Pnl("TrumpPanel", cvT, new Vector2(560,380), AMid, Vector2.zero, C_PANEL);
         tPnl.SetActive(false);
-        var tTitle  = Lbl("TrumpTitle",   "Prendre ?", tPnl.transform, new Vector2(0, 130), 20, C_WHITE, true);
-        var tCrdTxt = Lbl("TrumpCardTxt", "A♠",        tPnl.transform, new Vector2(0,  50), 40, C_BLKSUIT, true);
+        var tTitle  = Lbl("TrumpTitle",   "Prendre ?", tPnl.transform, new Vector2(0, 135), 24, C_WHITE, true);
+        var tCrdTxt = Lbl("TrumpCardTxt", "A♠",        tPnl.transform, new Vector2(0,  50), 48, C_BLKSUIT, true);
         var takeBt  = Btn("TakeBtn", tPnl.transform, "Prendre",
-                          new Vector2(190,56), AMid, new Vector2(-104,-55), C_BTNGRN);
+                          new Vector2(200,60), AMid, new Vector2(-108,-58), C_BTNGRN);
         var passBt  = Btn("PassBtn", tPnl.transform, "Passer",
-                          new Vector2(190,56), AMid, new Vector2( 104,-55), C_BTNRED);
+                          new Vector2(200,60), AMid, new Vector2( 108,-58), C_BTNRED);
 
-        var suitCt  = Pnl("SuitContainer", tPnl.transform, new Vector2(470,72), AMid, new Vector2(0,-105), Color.clear);
+        var suitCt  = Pnl("SuitContainer", tPnl.transform, new Vector2(490,76), AMid, new Vector2(0,-110), Color.clear);
         suitCt.SetActive(false);
         var suitBtns = new Button[4];
         string[] sym = {"♠","♥","♦","♣"};
@@ -137,28 +143,28 @@ public static class SceneBuilder
         for (int i = 0; i < 4; i++)
         {
             var sb  = Btn("SB_"+sym[i], suitCt.transform, sym[i],
-                          new Vector2(82,64), AMid, new Vector2(-150+i*102,0), C_WHITE);
+                          new Vector2(86,68), AMid, new Vector2(-155+i*104,0), C_WHITE);
             var sbt = sb.GetComponentInChildren<Text>(); if (sbt) sbt.color = sco[i];
             suitBtns[i] = sb.GetComponent<Button>();
         }
 
         // ── PANNEAU FIN DE MANCHE ──────────────────────────────────────────────
-        var endPnl  = Pnl("EndPanel", cvT, new Vector2(640,530), AMid, Vector2.zero, C_PANEL);
+        var endPnl  = Pnl("EndPanel", cvT, new Vector2(660,550), AMid, Vector2.zero, C_PANEL);
         endPnl.SetActive(false);
-        var tEndTi  = Lbl("EndTitle",   "Fin de manche", endPnl.transform, new Vector2(0,185), 26, C_GOLD,  true);
-        var tEndDt  = Lbl("EndDetails", "",              endPnl.transform, new Vector2(0, 30), 15, C_WHITE, false);
+        var tEndTi  = Lbl("EndTitle",   "Fin de manche", endPnl.transform, new Vector2(0,190), 30, C_GOLD,  true);
+        var tEndDt  = Lbl("EndDetails", "",              endPnl.transform, new Vector2(0, 30), 18, C_WHITE, false);
         var nextBt  = Btn("NextBtn", endPnl.transform, "Nouvelle manche",
-                          new Vector2(310,60), AMid, new Vector2(0,-198), C_BTNGRN);
+                          new Vector2(330,64), AMid, new Vector2(0,-202), C_BTNGRN);
 
         // ── PANNEAU MESSAGE FLASH ──────────────────────────────────────────────
-        var msgPnl  = Pnl("MsgPanel", cvT, new Vector2(640,110), AMid, new Vector2(0,100), C_PANEL);
+        var msgPnl  = Pnl("MsgPanel", cvT, new Vector2(660,120), AMid, new Vector2(0,100), C_PANEL);
         msgPnl.SetActive(false);
-        var tMsg    = Lbl("MsgText","", msgPnl.transform, Vector2.zero, 18, C_WHITE, false);
+        var tMsg    = Lbl("MsgText","", msgPnl.transform, Vector2.zero, 22, C_WHITE, false);
 
         // ── PANNEAU BELOTE/REBELOTE ────────────────────────────────────────────
-        var belPnl  = Pnl("BelotePanel", cvT, new Vector2(430,86), AMid, new Vector2(0,215), new Color(1f,0.84f,0f,0.96f));
+        var belPnl  = Pnl("BelotePanel", cvT, new Vector2(450,92), AMid, new Vector2(0,215), new Color(1f,0.84f,0f,0.96f));
         belPnl.SetActive(false);
-        var tBel    = Lbl("BeloteText","Belote !", belPnl.transform, Vector2.zero, 22, C_BLKSUIT, true);
+        var tBel    = Lbl("BeloteText","Belote !", belPnl.transform, Vector2.zero, 26, C_BLKSUIT, true);
 
         // ── PREFABS ────────────────────────────────────────────────────────────
         const string PF = "Assets/Prefabs";
@@ -291,7 +297,7 @@ public static class SceneBuilder
     static void MakeCardPrefab(string dir)
     {
         var root = new GameObject("CardPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(104,156);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(124,186);
         var bg   = root.AddComponent<Image>(); bg.color = Color.white;
         root.AddComponent<CanvasGroup>();
 
@@ -301,7 +307,7 @@ public static class SceneBuilder
 
         var lblGo = new GameObject("CardLabel"); lblGo.transform.SetParent(root.transform,false);
         var t = lblGo.AddComponent<Text>();
-        t.text = "A♠"; t.fontSize = 20; t.color = new Color(0.1f,0.1f,0.1f);
+        t.text = "A♠"; t.fontSize = 24; t.color = new Color(0.1f,0.1f,0.1f);
         t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         FillRT(lblGo.GetComponent<RectTransform>());
@@ -321,7 +327,7 @@ public static class SceneBuilder
     static void MakeCardBackPrefab(string dir)
     {
         var root = new GameObject("CardBackPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(90,135);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(108,162);
         var bg   = root.AddComponent<Image>(); bg.color = new Color(0.12f,0.25f,0.60f);
 
         var faceGo = new GameObject("CardFaceImage"); faceGo.transform.SetParent(root.transform,false);
@@ -338,7 +344,7 @@ public static class SceneBuilder
     static void MakeTrickCardPrefab(string dir)
     {
         var root = new GameObject("TrickCardPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(108,162);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(128,192);
         var bg   = root.AddComponent<Image>(); bg.color = Color.white;
         root.AddComponent<CanvasGroup>();
 
@@ -348,7 +354,7 @@ public static class SceneBuilder
 
         var lblGo = new GameObject("CardLabel"); lblGo.transform.SetParent(root.transform,false);
         var t = lblGo.AddComponent<Text>();
-        t.text = "A♠"; t.fontSize = 22; t.color = new Color(0.1f,0.1f,0.1f);
+        t.text = "A♠"; t.fontSize = 26; t.color = new Color(0.1f,0.1f,0.1f);
         t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         FillRT(lblGo.GetComponent<RectTransform>());
@@ -407,7 +413,7 @@ public static class SceneBuilder
         var tGo = new GameObject("Label"); tGo.transform.SetParent(go.transform,false);
         FillRT(tGo.AddComponent<RectTransform>());
         var t = tGo.AddComponent<Text>();
-        t.text = label; t.fontSize = 17; t.color = Color.white;
+        t.text = label; t.fontSize = 20; t.color = Color.white;
         t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         return go;

@@ -10,13 +10,13 @@ namespace BeloteFreeze.UI
     public class CardFanLayout : MonoBehaviour
     {
         [Tooltip("Decalage horizontal entre deux cartes (chevauchement si < largeur de carte)")]
-        public float CardSpacing = 64f;
+        public float CardSpacing = 76f;
 
         [Tooltip("Angle max (en degres) applique aux cartes des extremites")]
         public float MaxAngle = 16f;
 
         [Tooltip("Hauteur de l'arc (les cartes du centre sont plus hautes)")]
-        public float ArcHeight = 36f;
+        public float ArcHeight = 40f;
 
         void OnTransformChildrenChanged() => Arrange();
 

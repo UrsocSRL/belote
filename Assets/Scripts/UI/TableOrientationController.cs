@@ -4,13 +4,17 @@ namespace BeloteFreeze.UI
 {
     /// <summary>
     /// Adapte la zone de table (TableZone) a l'orientation de l'appareil.
-    /// Portrait : table plus haute que large. Paysage : table plus large que haute.
+    /// Portrait : table plus haute que large, image pivotee de 90° (table.png est un ovale "paysage").
+    /// Paysage   : table plus large que haute, image non pivotee.
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public class TableOrientationController : MonoBehaviour
     {
-        public Vector2 PortraitSize  = new Vector2(840, 740);
-        public Vector2 LandscapeSize = new Vector2(1000, 740);
+        public Vector2 PortraitSize  = new Vector2(760, 900);
+        public Vector2 LandscapeSize = new Vector2(1000, 620);
+
+        [Tooltip("RectTransform de l'image de table (pivotee en portrait car table.png est un ovale paysage)")]
+        public RectTransform TableImage;
 
         RectTransform _rt;
         bool _lastLandscape;
@@ -26,6 +30,9 @@ namespace BeloteFreeze.UI
             if (_initialized && isLandscape == _lastLandscape) return;
 
             _rt.sizeDelta = isLandscape ? LandscapeSize : PortraitSize;
+            if (TableImage != null)
+                TableImage.localEulerAngles = new Vector3(0, 0, isLandscape ? 0f : 90f);
+
             _lastLandscape = isLandscape;
             _initialized = true;
         }
