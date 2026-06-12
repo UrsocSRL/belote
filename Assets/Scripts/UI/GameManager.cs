@@ -262,6 +262,11 @@ namespace BeloteFreeze.UI
         // ── API publique pour UIManager ───────────────────────────────────────
 
         /// <summary>
+        /// Scores totaux exposés pour l'affichage IMGUI.
+        /// </summary>
+        public int[] _scoreMgrTotal => new int[]{ _scoreMgr.TotalScoreUs, _scoreMgr.TotalScoreThem };
+
+        /// <summary>
         /// FIX — Expose le nombre de cartes d'un joueur IA (pour RenderAIBack).
         /// </summary>
         public int GetPlayerHandCount(int seat)
