@@ -1,10 +1,7 @@
 {
     "name": "BeloteFreeze.Editor",
     "rootNamespace": "BeloteFreeze",
-    "references": [
-        "BeloteFreeze.Runtime",
-        "Unity.TextMeshPro"
-    ],
+    "references": [],
     "includePlatforms": [
         "Editor"
     ],
