@@ -1,554 +1,349 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEngine.UI;
-using TMPro;
 using BeloteFreeze.Core;
 using BeloteFreeze.UI;
 
 /// <summary>
 /// Script Editor : génère toute la GameScene Belote Freeze en un clic.
-/// Menu Unity : BeloteFreeze > Build GameScene
-///
-/// Tâche 2 — Création de la GameScene :
-///   Canvas principal, Zone joueur, Zone IA gauche/haut/droite,
-///   Zone pli central, Zone score, Zone annonces, Boutons d'action.
-///
-/// Tâche 3 — Création des Prefabs :
-///   CardPrefab, CardBackPrefab, TrickCardPrefab.
+/// Menu Unity : BeloteFreeze > Build GameScene  (Ctrl+Shift+B)
+/// Utilise UnityEngine.UI.Text uniquement — pas de TMPro requis.
 /// </summary>
 public static class SceneBuilder
 {
-    // ── Palette de couleurs ───────────────────────────────────────────────────
-    static readonly Color COL_BG          = new Color(0.08f, 0.36f, 0.16f);   // vert table
-    static readonly Color COL_CARD_BG     = Color.white;
-    static readonly Color COL_CARD_BACK   = new Color(0.12f, 0.25f, 0.60f);   // bleu dos
-    static readonly Color COL_PANEL       = new Color(0f, 0f, 0f, 0.70f);
-    static readonly Color COL_PANEL_LIGHT = new Color(0f, 0f, 0f, 0.50f);
-    static readonly Color COL_BTN_GREEN   = new Color(0.17f, 0.48f, 0.17f);
-    static readonly Color COL_BTN_RED     = new Color(0.55f, 0.15f, 0.15f);
-    static readonly Color COL_SUIT_RED    = new Color(0.80f, 0.10f, 0.10f);
-    static readonly Color COL_SUIT_BLACK  = new Color(0.10f, 0.10f, 0.10f);
-    static readonly Color COL_GOLD        = new Color(1.00f, 0.84f, 0.00f);
-    static readonly Color COL_WHITE_TEXT  = Color.white;
+    static readonly Color C_BG        = new Color(0.08f, 0.36f, 0.16f);
+    static readonly Color C_PANEL     = new Color(0f, 0f, 0f, 0.72f);
+    static readonly Color C_PANEL_LT  = new Color(0f, 0f, 0f, 0.45f);
+    static readonly Color C_BTN_GRN   = new Color(0.17f, 0.48f, 0.17f);
+    static readonly Color C_BTN_RED   = new Color(0.55f, 0.15f, 0.15f);
+    static readonly Color C_CARD      = Color.white;
+    static readonly Color C_BACK      = new Color(0.12f, 0.25f, 0.60f);
+    static readonly Color C_RED_SUIT  = new Color(0.80f, 0.10f, 0.10f);
+    static readonly Color C_BLK_SUIT  = new Color(0.10f, 0.10f, 0.10f);
+    static readonly Color C_GOLD      = new Color(1.00f, 0.84f, 0.00f);
+    static readonly Color C_WHITE     = Color.white;
+    static readonly Color C_GRN_LBL   = new Color(0.6f, 0.9f, 0.6f);
+    static readonly Color C_RED_LBL   = new Color(0.9f, 0.6f, 0.6f);
+    static readonly Color C_AI_LBL    = new Color(0.8f, 1f, 0.8f);
 
-    // ─────────────────────────────────────────────────────────────────────────
     [MenuItem("BeloteFreeze/Build GameScene %#b")]
     public static void BuildScene()
     {
-        // --- Fond de scène ---
-        Camera cam = Camera.main;
-        if (cam == null)
-        {
-            var camGo = new GameObject("Main Camera");
-            cam = camGo.AddComponent<Camera>();
-            camGo.tag = "MainCamera";
-        }
-        cam.clearFlags      = CameraClearFlags.SolidColor;
-        cam.backgroundColor = COL_BG;
-        cam.orthographic    = true;
+        // Caméra fond vert
+        var cam = Camera.main ?? new GameObject("Main Camera").AddComponent<Camera>();
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.backgroundColor = C_BG;
+        cam.orthographic = true;
+        cam.gameObject.tag = "MainCamera";
 
-        // --- Canvas principal ---
-        var canvasGo = CreateGO("Canvas");
-        var canvas   = canvasGo.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 0;
-        var scaler = canvasGo.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode         = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1080, 1920);
-        scaler.screenMatchMode     = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-        scaler.matchWidthOrHeight  = 0.5f;
-        canvasGo.AddComponent<GraphicRaycaster>();
+        // Canvas principal
+        var cvGo = new GameObject("Canvas");
+        var cv   = cvGo.AddComponent<Canvas>();
+        cv.renderMode = RenderMode.ScreenSpaceOverlay;
+        var sc = cvGo.AddComponent<CanvasScaler>();
+        sc.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        sc.referenceResolution = new Vector2(1080, 1920);
+        sc.matchWidthOrHeight  = 0.5f;
+        cvGo.AddComponent<GraphicRaycaster>();
+        Transform cvT = cvGo.transform;
 
-        // ── Zone Score ───────────────────────────────────────────────────────
-        var scorePanel = CreatePanel("ScorePanel", canvasGo.transform,
-            new Vector2(1080, 80),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-            new Vector2(0, -40), COL_PANEL);
+        // ── Score ──────────────────────────────────────────────────────────
+        var scorePanel = Panel("ScorePanel", cvT, new Vector2(1080,80), AnchorTop, new Vector2(0,-40), C_PANEL);
+        var tScoreUs   = Lbl("ScoreUs",   "0",    scorePanel, new Vector2(-200,0),  28, C_WHITE,   true);
+        var tScoreThem = Lbl("ScoreThem", "0",    scorePanel, new Vector2( 200,0),  28, C_WHITE,   true);
+        var tTrumpInd  = Lbl("TrumpInd",  "",     scorePanel, new Vector2(0, 14),   18, C_GOLD,    true);
+                         Lbl("LblNous",   "Nous", scorePanel, new Vector2(-200,-24),13, C_GRN_LBL, false);
+                         Lbl("LblEux",    "Eux",  scorePanel, new Vector2( 200,-24),13, C_RED_LBL, false);
 
-        var scoreUsGo  = CreateLabel("ScoreUs",   "0", scorePanel.transform, new Vector2(-200, 0), 28, COL_WHITE_TEXT, FontStyles.Bold);
-        var scoreSep   = CreateLabel("ScoreSep",  "—", scorePanel.transform, new Vector2(0, 0),    20, COL_WHITE_TEXT, FontStyles.Normal);
-        var scoreThGo  = CreateLabel("ScoreThem", "0", scorePanel.transform, new Vector2(200, 0),  28, COL_WHITE_TEXT, FontStyles.Bold);
-        CreateLabel("LabelUs",   "Nous", scorePanel.transform, new Vector2(-200, -24), 14, new Color(0.6f, 0.9f, 0.6f), FontStyles.Normal);
-        CreateLabel("LabelThem", "Eux",  scorePanel.transform, new Vector2(200,  -24), 14, new Color(0.9f, 0.6f, 0.6f), FontStyles.Normal);
-        var trumpIndGo = CreateLabel("TrumpIndicator", "", scorePanel.transform, new Vector2(0, 16), 18, COL_GOLD, FontStyles.Bold);
+        // ── IA Haut (Nord) ─────────────────────────────────────────────────
+        var aiTopZone = Panel("AITopZone", cvT, new Vector2(720,120), AnchorTop, new Vector2(0,-130), Color.clear);
+                        Lbl("LblNord","Nord", aiTopZone.transform, new Vector2(0,42), 13, C_AI_LBL, false);
+        var aiTopHand = Container("AITopHand", aiTopZone.transform, new Vector2(0,0), new Vector2(680,80), true);
 
-        // ── Zone IA Haut (Nord) ───────────────────────────────────────────────
-        var aiTopZone = CreatePanel("AITopZone", canvasGo.transform,
-            new Vector2(700, 120),
-            new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-            new Vector2(0, -130), Color.clear);
-        CreateLabel("LabelNord", "Nord", aiTopZone.transform, new Vector2(0, 40), 14, new Color(0.8f, 1f, 0.8f), FontStyles.Normal);
-        var aiTopHand = CreateContainer("AITopHand", aiTopZone.transform, new Vector2(0, 0), new Vector2(660, 80), horizontal: true, spacing: 4);
+        // ── IA Gauche (Ouest) ──────────────────────────────────────────────
+        var aiLeftZone = Panel("AILeftZone", cvT, new Vector2(110,400), AnchorLeft, new Vector2(55,0), Color.clear);
+                         Lbl("LblOuest","Ouest", aiLeftZone.transform, new Vector2(0,160), 13, C_AI_LBL, false);
+        var aiLeftHand = Container("AILeftHand", aiLeftZone.transform, new Vector2(0,0), new Vector2(80,360), false);
 
-        // ── Zone IA Gauche (Ouest) ────────────────────────────────────────────
-        var aiLeftZone = CreatePanel("AILeftZone", canvasGo.transform,
-            new Vector2(120, 400),
-            new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
-            new Vector2(60, 0), Color.clear);
-        CreateLabel("LabelOuest", "Ouest", aiLeftZone.transform, new Vector2(0, 160), 14, new Color(0.8f, 1f, 0.8f), FontStyles.Normal);
-        var aiLeftHand = CreateContainer("AILeftHand", aiLeftZone.transform, new Vector2(0, 0), new Vector2(80, 360), horizontal: false, spacing: 4);
+        // ── IA Droite (Est) ────────────────────────────────────────────────
+        var aiRightZone = Panel("AIRightZone", cvT, new Vector2(110,400), AnchorRight, new Vector2(-55,0), Color.clear);
+                          Lbl("LblEst","Est", aiRightZone.transform, new Vector2(0,160), 13, C_AI_LBL, false);
+        var aiRightHand = Container("AIRightHand", aiRightZone.transform, new Vector2(0,0), new Vector2(80,360), false);
 
-        // ── Zone IA Droite (Est) ──────────────────────────────────────────────
-        var aiRightZone = CreatePanel("AIRightZone", canvasGo.transform,
-            new Vector2(120, 400),
-            new Vector2(1f, 0.5f), new Vector2(1f, 0.5f),
-            new Vector2(-60, 0), Color.clear);
-        CreateLabel("LabelEst", "Est", aiRightZone.transform, new Vector2(0, 160), 14, new Color(0.8f, 1f, 0.8f), FontStyles.Normal);
-        var aiRightHand = CreateContainer("AIRightHand", aiRightZone.transform, new Vector2(0, 0), new Vector2(80, 360), horizontal: false, spacing: 4);
+        // ── Table centrale (4 slots) ───────────────────────────────────────
+        var tableZone = Panel("TableZone", cvT, new Vector2(420,360), AnchorMid, new Vector2(0,60), Color.clear);
+        var slotSud   = Slot("SlotSud",   tableZone.transform, new Vector2(  0,-110));
+        var slotOuest = Slot("SlotOuest", tableZone.transform, new Vector2(-140,  0));
+        var slotNord  = Slot("SlotNord",  tableZone.transform, new Vector2(  0, 110));
+        var slotEst   = Slot("SlotEst",   tableZone.transform, new Vector2( 140,  0));
 
-        // ── Zone Pli Central (4 slots) ────────────────────────────────────────
-        var tableZone = CreatePanel("TableZone", canvasGo.transform,
-            new Vector2(400, 340),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0, 60), Color.clear);
+        // ── Main joueur (Sud) ──────────────────────────────────────────────
+        var handZone  = Panel("HandZone", cvT, new Vector2(1080,200), AnchorBot, new Vector2(0,110), Color.clear);
+        var humanHand = Container("HumanHand", handZone.transform, Vector2.zero, new Vector2(1020,180), true);
 
-        // Slots : [0]=Sud [1]=Ouest [2]=Nord [3]=Est
-        // Positions dans le carré central
-        var slotSud   = CreateSlot("SlotSud",   tableZone.transform, new Vector2(  0, -100));
-        var slotOuest = CreateSlot("SlotOuest", tableZone.transform, new Vector2(-130,  0));
-        var slotNord  = CreateSlot("SlotNord",  tableZone.transform, new Vector2(  0,  100));
-        var slotEst   = CreateSlot("SlotEst",   tableZone.transform, new Vector2( 130,  0));
+        // ── Info bar ───────────────────────────────────────────────────────
+        var infoBar  = Panel("InfoBar", cvT, new Vector2(780,44), AnchorBot, new Vector2(0,314), C_PANEL_LT);
+        var tInfoBar = Lbl("InfoBarText","A vous de jouer", infoBar.transform, Vector2.zero, 16, C_WHITE, false);
 
-        // ── Zone Main Joueur (Sud) ────────────────────────────────────────────
-        var handZone = CreatePanel("HumanHandZone", canvasGo.transform,
-            new Vector2(1080, 200),
-            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
-            new Vector2(0, 110), Color.clear);
-        var humanHand = CreateContainer("HumanHand", handZone.transform, new Vector2(0, 0), new Vector2(1020, 180), horizontal: true, spacing: 6);
+        // ── Bouton Dernier pli ─────────────────────────────────────────────
+        var lastBtn  = Btn("LastTrickBtn", cvT, "Dernier pli", new Vector2(160,44), AnchorBotL, new Vector2(90,314), C_PANEL);
 
-        // ── Zone Info Bar ─────────────────────────────────────────────────────
-        var infoBar = CreatePanel("InfoBar", canvasGo.transform,
-            new Vector2(800, 40),
-            new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
-            new Vector2(0, 310), COL_PANEL_LIGHT);
-        var infoText = CreateLabel("InfoBarText", "À vous de jouer", infoBar.transform, Vector2.zero, 16, COL_WHITE_TEXT, FontStyles.Normal);
+        // ── Panneau Dernier pli ────────────────────────────────────────────
+        var lpPanel  = Panel("LastTrickPanel", cvT, new Vector2(520,190), AnchorMid, Vector2.zero, C_PANEL);
+        var tLPText  = Lbl("LastTrickText","", lpPanel.transform, Vector2.zero, 15, C_WHITE, false);
+        lpPanel.SetActive(false);
 
-        // ── Bouton Dernier Pli ────────────────────────────────────────────────
-        var lastTrickBtnGo = CreateButton("LastTrickBtn", canvasGo.transform,
-            "Dernier pli", new Vector2(160, 44),
-            new Vector2(0f, 0f), new Vector2(0f, 0f),
-            new Vector2(90, 310), COL_PANEL);
+        // ── Panneau Prise d'Atout ──────────────────────────────────────────
+        var tPanel   = Panel("TrumpPanel", cvT, new Vector2(520,340), AnchorMid, Vector2.zero, C_PANEL);
+        tPanel.SetActive(false);
+        var tTitle   = Lbl("TrumpTitle","Prendre ?",   tPanel.transform, new Vector2(0,120), 20, C_WHITE, true);
+        var tCardTxt = Lbl("TrumpCardText","A♠",       tPanel.transform, new Vector2(0, 50), 38, C_BLK_SUIT, true);
+        var takeBt   = Btn("TakeBtn",  tPanel.transform, "Prendre",  new Vector2(180,54), AnchorMid, new Vector2(-100,-50), C_BTN_GRN);
+        var passBt   = Btn("PassBtn",  tPanel.transform, "Passer",   new Vector2(180,54), AnchorMid, new Vector2( 100,-50), C_BTN_RED);
 
-        // ── Panneau Dernier Pli ───────────────────────────────────────────────
-        var lastTrickPanel = CreatePanel("LastTrickPanel", canvasGo.transform,
-            new Vector2(500, 180),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            Vector2.zero, COL_PANEL);
-        lastTrickPanel.SetActive(false);
-        var lastTrickText = CreateLabel("LastTrickText", "", lastTrickPanel.transform, Vector2.zero, 16, COL_WHITE_TEXT, FontStyles.Normal);
-
-        // ── Panneau Prise d'Atout ─────────────────────────────────────────────
-        var trumpPanel = CreatePanel("TrumpPanel", canvasGo.transform,
-            new Vector2(500, 320),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            Vector2.zero, COL_PANEL);
-        trumpPanel.SetActive(false);
-
-        var trumpTitle   = CreateLabel("TrumpPanelTitle", "Prendre ?", trumpPanel.transform, new Vector2(0, 110), 20, COL_WHITE_TEXT, FontStyles.Bold);
-        var trumpCardTxt = CreateLabel("TrumpCardText",   "A♠",        trumpPanel.transform, new Vector2(0,  50), 36, COL_SUIT_BLACK,  FontStyles.Bold);
-        var trumpCardImg = trumpPanel.transform.Find("TrumpCardText").gameObject.AddComponent<Image>();
-
-        var takeBtnGo  = CreateButton("TakeButton",  trumpPanel.transform, "Prendre", new Vector2(180, 56), pivot: new Vector2(0.5f,0.5f), anchor: new Vector2(0.5f,0.5f), pos: new Vector2(-100, -40), color: COL_BTN_GREEN);
-        var passBtnGo  = CreateButton("PassButton",  trumpPanel.transform, "Passer",  new Vector2(180, 56), pivot: new Vector2(0.5f,0.5f), anchor: new Vector2(0.5f,0.5f), pos: new Vector2( 100, -40), color: COL_BTN_RED);
-
-        // Container boutons couleurs (tour 2)
-        var suitContainer = CreatePanel("SuitButtonsContainer", trumpPanel.transform,
-            new Vector2(440, 70),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0, -90), Color.clear);
-        suitContainer.SetActive(false);
+        var suitCont = Panel("SuitContainer", tPanel.transform, new Vector2(460,70), AnchorMid, new Vector2(0,-100), Color.clear);
+        suitCont.SetActive(false);
         var suitBtns = new Button[4];
-        string[] suitSymbols = { "♠", "♥", "♦", "♣" };
-        Color[]  suitColors  = { COL_SUIT_BLACK, COL_SUIT_RED, COL_SUIT_RED, COL_SUIT_BLACK };
+        string[] sym    = {"♠","♥","♦","♣"};
+        Color[]  symCol = {C_BLK_SUIT, C_RED_SUIT, C_RED_SUIT, C_BLK_SUIT};
         for (int i = 0; i < 4; i++)
         {
-            var sb = CreateButton($"SuitBtn_{suitSymbols[i]}", suitContainer.transform,
-                suitSymbols[i], new Vector2(80, 64),
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(-150 + i * 100, 0), COL_CARD_BG);
-            var sbtmp = sb.GetComponentInChildren<TextMeshProUGUI>();
-            if (sbtmp != null) sbtmp.color = suitColors[i];
+            var sb  = Btn("Suit_"+sym[i], suitCont.transform, sym[i], new Vector2(80,60), AnchorMid, new Vector2(-150+i*100,0), C_CARD);
+            var sbt = sb.GetComponentInChildren<Text>();
+            if (sbt != null) sbt.color = symCol[i];
             suitBtns[i] = sb.GetComponent<Button>();
         }
 
-        // ── Panneau Fin de Manche ─────────────────────────────────────────────
-        var endPanel = CreatePanel("EndPanel", canvasGo.transform,
-            new Vector2(600, 500),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            Vector2.zero, COL_PANEL);
+        // ── Panneau Fin de manche ──────────────────────────────────────────
+        var endPanel   = Panel("EndPanel", cvT, new Vector2(620,520), AnchorMid, Vector2.zero, C_PANEL);
         endPanel.SetActive(false);
-        var endTitle   = CreateLabel("EndTitleText",   "Fin de manche", endPanel.transform, new Vector2(0, 170), 26, COL_GOLD,       FontStyles.Bold);
-        var endDetails = CreateLabel("EndDetailsText", "",              endPanel.transform, new Vector2(0,  30), 16, COL_WHITE_TEXT, FontStyles.Normal);
-        var nextBtnGo  = CreateButton("NextHandButton", endPanel.transform, "Nouvelle manche",
-            new Vector2(280, 60),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0, -180), COL_BTN_GREEN);
+        var tEndTitle  = Lbl("EndTitle",   "Fin de manche", endPanel.transform, new Vector2(0,180), 26, C_GOLD,  true);
+        var tEndDet    = Lbl("EndDetails", "",              endPanel.transform, new Vector2(0, 30), 15, C_WHITE, false);
+        var nextBt     = Btn("NextBtn",    endPanel.transform,"Nouvelle manche", new Vector2(290,58), AnchorMid, new Vector2(0,-190), C_BTN_GRN);
 
-        // ── Panneau Message Flash ─────────────────────────────────────────────
-        var msgPanel = CreatePanel("MessagePanel", canvasGo.transform,
-            new Vector2(600, 100),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0, 100), COL_PANEL);
+        // ── Panneau Message flash ──────────────────────────────────────────
+        var msgPanel   = Panel("MsgPanel", cvT, new Vector2(620,110), AnchorMid, new Vector2(0,100), C_PANEL);
         msgPanel.SetActive(false);
-        var msgText = CreateLabel("MessageText", "", msgPanel.transform, Vector2.zero, 18, COL_WHITE_TEXT, FontStyles.Normal);
+        var tMsgText   = Lbl("MsgText","", msgPanel.transform, Vector2.zero, 18, C_WHITE, false);
 
-        // ── Panneau Belote/Rebelote ───────────────────────────────────────────
-        var belotePanel = CreatePanel("BeloteAnnouncePanel", canvasGo.transform,
-            new Vector2(400, 80),
-            new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-            new Vector2(0, 200), new Color(1f, 0.84f, 0f, 0.95f));
-        belotePanel.SetActive(false);
-        var beloteText = CreateLabel("BeloteAnnounceText", "Belote !", belotePanel.transform, Vector2.zero, 22, COL_SUIT_BLACK, FontStyles.Bold);
+        // ── Panneau Belote/Rebelote ────────────────────────────────────────
+        var belPanel   = Panel("BelotePanel", cvT, new Vector2(420,84), AnchorMid, new Vector2(0,210), new Color(1f,0.84f,0f,0.96f));
+        belPanel.SetActive(false);
+        var tBelText   = Lbl("BeloteText","Belote !", belPanel.transform, Vector2.zero, 22, C_BLK_SUIT, true);
 
-        // ─────────────────────────────────────────────────────────────────────
-        // PREFABS — Tâche 3
-        // ─────────────────────────────────────────────────────────────────────
-        string prefabFolder = "Assets/Prefabs";
-        if (!AssetDatabase.IsValidFolder(prefabFolder))
-            AssetDatabase.CreateFolder("Assets", "Prefabs");
+        // ── Prefabs ────────────────────────────────────────────────────────
+        const string PF = "Assets/Prefabs";
+        if (!AssetDatabase.IsValidFolder(PF)) AssetDatabase.CreateFolder("Assets","Prefabs");
+        MakeCardPrefab(PF);
+        MakeCardBackPrefab(PF);
+        MakeTrickCardPrefab(PF);
 
-        BuildCardPrefab(prefabFolder);
-        BuildCardBackPrefab(prefabFolder);
-        BuildTrickCardPrefab(prefabFolder);
-
-        // ─────────────────────────────────────────────────────────────────────
-        // GAMEOBJECTS LOGIQUE
-        // ─────────────────────────────────────────────────────────────────────
-        var gmGo = CreateGO("GameManager");
+        // ── GameObjects logique ────────────────────────────────────────────
+        var gmGo = new GameObject("GameManager"); gmGo.AddComponent<RectTransform>();
         var gm   = gmGo.AddComponent<GameManager>();
-
-        var uimGo = CreateGO("UIManager");
+        var uimGo = new GameObject("UIManager");  uimGo.AddComponent<RectTransform>();
         var uim   = uimGo.AddComponent<UIManager>();
-
-        // Brancher les références GameManager → UIManager
         gm.UIManager = uim;
 
-        // Brancher les références UIManager
-        uim.ScoreUsText          = scoreUsGo.GetComponent<TextMeshProUGUI>();
-        uim.ScoreThemText        = scoreThGo.GetComponent<TextMeshProUGUI>();
-        uim.TrumpIndicatorText   = trumpIndGo.GetComponent<TextMeshProUGUI>();
-
-        uim.TrumpPanel           = trumpPanel;
-        uim.TrumpPanelTitle      = trumpTitle.GetComponent<TextMeshProUGUI>();
-        uim.TrumpCardText        = trumpCardTxt.GetComponent<TextMeshProUGUI>();
-        uim.TakeButton           = takeBtnGo.GetComponent<Button>();
-        uim.PassButton           = passBtnGo.GetComponent<Button>();
-        uim.SuitButtonsContainer = suitContainer;
-        uim.SuitButtons          = suitBtns;
-
-        uim.HumanHandContainer   = humanHand.transform;
-        uim.AIHandContainers     = new Transform[]
-        {
-            aiLeftHand.transform,
-            aiTopHand.transform,
-            aiRightHand.transform
-        };
-
-        // Charger les prefabs depuis Assets/Prefabs
-        uim.CardPrefab      = AssetDatabase.LoadAssetAtPath<GameObject>($"{prefabFolder}/CardPrefab.prefab");
-        uim.CardBackPrefab  = AssetDatabase.LoadAssetAtPath<GameObject>($"{prefabFolder}/CardBackPrefab.prefab");
-        uim.TrickCardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{prefabFolder}/TrickCardPrefab.prefab");
-
-        uim.TrickSlots = new Transform[]
-        {
-            slotSud.transform,
-            slotOuest.transform,
-            slotNord.transform,
-            slotEst.transform
-        };
-
-        uim.MessagePanel         = msgPanel;
-        uim.MessageText          = msgText.GetComponent<TextMeshProUGUI>();
-        uim.BeloteAnnouncePanel  = belotePanel;
-        uim.BeloteAnnounceText   = beloteText.GetComponent<TextMeshProUGUI>();
-
-        uim.EndPanel             = endPanel;
-        uim.EndTitleText         = endTitle.GetComponent<TextMeshProUGUI>();
-        uim.EndDetailsText       = endDetails.GetComponent<TextMeshProUGUI>();
-        uim.NextHandButton       = nextBtnGo.GetComponent<Button>();
-
-        uim.InfoBarText          = infoText.GetComponent<TextMeshProUGUI>();
-        uim.LastTrickButton      = lastTrickBtnGo.GetComponent<Button>();
-        uim.LastTrickPanel       = lastTrickPanel;
-        uim.LastTrickText        = lastTrickText.GetComponent<TextMeshProUGUI>();
+        // Brancher UIManager
+        uim.ScoreUsText         = tScoreUs;
+        uim.ScoreThemText       = tScoreThem;
+        uim.TrumpIndicatorText  = tTrumpInd;
+        uim.TrumpPanel          = tPanel;
+        uim.TrumpPanelTitle     = tTitle;
+        uim.TrumpCardText       = tCardTxt;
+        uim.TakeButton          = takeBt.GetComponent<Button>();
+        uim.PassButton          = passBt.GetComponent<Button>();
+        uim.SuitButtonsContainer= suitCont;
+        uim.SuitButtons         = suitBtns;
+        uim.HumanHandContainer  = humanHand.transform;
+        uim.AIHandContainers    = new Transform[]{ aiLeftHand.transform, aiTopHand.transform, aiRightHand.transform };
+        uim.CardPrefab          = AssetDatabase.LoadAssetAtPath<GameObject>(PF+"/CardPrefab.prefab");
+        uim.CardBackPrefab      = AssetDatabase.LoadAssetAtPath<GameObject>(PF+"/CardBackPrefab.prefab");
+        uim.TrickCardPrefab     = AssetDatabase.LoadAssetAtPath<GameObject>(PF+"/TrickCardPrefab.prefab");
+        uim.TrickSlots          = new Transform[]{ slotSud.transform, slotOuest.transform, slotNord.transform, slotEst.transform };
+        uim.MessagePanel        = msgPanel;
+        uim.MessageText         = tMsgText;
+        uim.BeloteAnnouncePanel = belPanel;
+        uim.BeloteAnnounceText  = tBelText;
+        uim.EndPanel            = endPanel;
+        uim.EndTitleText        = tEndTitle;
+        uim.EndDetailsText      = tEndDet;
+        uim.NextHandButton      = nextBt.GetComponent<Button>();
+        uim.InfoBarText         = tInfoBar;
+        uim.LastTrickButton     = lastBtn.GetComponent<Button>();
+        uim.LastTrickPanel      = lpPanel;
+        uim.LastTrickText       = tLPText;
 
         // EventSystem
         if (Object.FindFirstObjectByType<UnityEngine.EventSystems.EventSystem>() == null)
         {
-            var esGo = CreateGO("EventSystem");
-            esGo.AddComponent<UnityEngine.EventSystems.EventSystem>();
-            esGo.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+            var es = new GameObject("EventSystem");
+            es.AddComponent<UnityEngine.EventSystems.EventSystem>();
+            es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
         }
 
-        // Sauvegarder la scène
+        if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
+            AssetDatabase.CreateFolder("Assets","Scenes");
+
         UnityEditor.SceneManagement.EditorSceneManager.SaveScene(
             UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene(),
             "Assets/Scenes/GameScene.unity");
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-
-        Debug.Log("[BeloteFreeze] GameScene construite avec succès !");
+        Debug.Log("[BeloteFreeze] GameScene construite avec succes !");
     }
 
-    // ── Constructeurs de Prefabs (Tâche 3) ───────────────────────────────────
-
-    static void BuildCardPrefab(string folder)
+    // ── Prefabs ───────────────────────────────────────────────────────────────
+    static void MakeCardPrefab(string dir)
     {
-        // CardPrefab : Image + TMP + Button + CanvasGroup + CardView
-        var root = CreateGO("CardPrefab");
+        var root = new GameObject("CardPrefab");
         root.AddComponent<CanvasGroup>();
+        var rt = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(72,100);
+        // Supprimer doublon RectTransform ajouté par AddComponent si déjà présent
+        var bg = root.AddComponent<Image>(); bg.color = Color.white;
 
-        var bg = root.AddComponent<Image>();
-        bg.color = Color.white;
+        var txtGo = new GameObject("CardLabel"); txtGo.transform.SetParent(root.transform,false);
+        var t = txtGo.AddComponent<Text>();
+        t.text      = "A♠";
+        t.fontSize  = 20;
+        t.color     = new Color(0.1f,0.1f,0.1f);
+        t.alignment = TextAnchor.MiddleCenter;
+        t.fontStyle = FontStyle.Bold;
+        FillParent(txtGo.GetComponent<RectTransform>());
 
-        // RectTransform
-        var rt = root.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(72, 100);
-
-        // TextMeshPro (rang + couleur)
-        var textGo = CreateGO("CardText");
-        textGo.transform.SetParent(root.transform, false);
-        var tmp = textGo.AddComponent<TextMeshProUGUI>();
-        tmp.text      = "A♠";
-        tmp.fontSize  = 22;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color     = COL_SUIT_BLACK;
-        var textRt = textGo.GetComponent<RectTransform>();
-        textRt.anchorMin = Vector2.zero;
-        textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = Vector2.zero;
-        textRt.offsetMax = Vector2.zero;
-
-        // TrumpHighlight (bordure dorée, désactivée par défaut)
-        var highlightGo = CreateGO("TrumpHighlight");
-        highlightGo.transform.SetParent(root.transform, false);
-        var hlImg = highlightGo.AddComponent<Image>();
-        hlImg.color = new Color(1f, 0.84f, 0f, 0.5f);
-        var hlRt = highlightGo.GetComponent<RectTransform>();
-        hlRt.anchorMin = Vector2.zero;
-        hlRt.anchorMax = Vector2.one;
-        hlRt.offsetMin = new Vector2(-3, -3);
-        hlRt.offsetMax = new Vector2(3, 3);
-        highlightGo.SetActive(false);
-
-        // CardView
-        var cv = root.AddComponent<CardView>();
-        cv.RankText      = tmp;
-        cv.SuitText      = tmp;
-        cv.CardBackground = bg;
-        cv.TrumpHighlight = hlImg;
-
-        // Button
-        root.AddComponent<Button>();
-
-        // Sauvegarder
-        PrefabUtility.SaveAsPrefabAsset(root, $"{folder}/CardPrefab.prefab");
-        Object.DestroyImmediate(root);
-    }
-
-    static void BuildCardBackPrefab(string folder)
-    {
-        // CardBackPrefab : Image bleue, pas de bouton
-        var root = CreateGO("CardBackPrefab");
-        var rt   = root.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(72, 100);
-
-        var bg = root.AddComponent<Image>();
-        bg.color = new Color(0.12f, 0.25f, 0.60f);
-
-        // Motif croix (décoratif)
-        var lineGo = CreateGO("Pattern");
-        lineGo.transform.SetParent(root.transform, false);
-        var lineImg = lineGo.AddComponent<Image>();
-        lineImg.color = new Color(1f, 1f, 1f, 0.12f);
-        var lineRt = lineGo.GetComponent<RectTransform>();
-        lineRt.anchorMin = new Vector2(0.1f, 0.1f);
-        lineRt.anchorMax = new Vector2(0.9f, 0.9f);
-        lineRt.offsetMin = Vector2.zero;
-        lineRt.offsetMax = Vector2.zero;
-
-        PrefabUtility.SaveAsPrefabAsset(root, $"{folder}/CardBackPrefab.prefab");
-        Object.DestroyImmediate(root);
-    }
-
-    static void BuildTrickCardPrefab(string folder)
-    {
-        // TrickCardPrefab : même que CardPrefab mais légèrement plus grand, sans Button interactif
-        var root = CreateGO("TrickCardPrefab");
-        root.AddComponent<CanvasGroup>();
-        var bg = root.AddComponent<Image>();
-        bg.color = Color.white;
-
-        var rt = root.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(80, 112);
-
-        var textGo = CreateGO("CardText");
-        textGo.transform.SetParent(root.transform, false);
-        var tmp = textGo.AddComponent<TextMeshProUGUI>();
-        tmp.text      = "A♠";
-        tmp.fontSize  = 24;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.color     = COL_SUIT_BLACK;
-        var textRt = textGo.GetComponent<RectTransform>();
-        textRt.anchorMin = Vector2.zero;
-        textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = Vector2.zero;
-        textRt.offsetMax = Vector2.zero;
-
-        // TrumpHighlight
-        var hlGo  = CreateGO("TrumpHighlight");
-        hlGo.transform.SetParent(root.transform, false);
-        var hlImg = hlGo.AddComponent<Image>();
-        hlImg.color = new Color(1f, 0.84f, 0f, 0.6f);
-        var hlRt  = hlGo.GetComponent<RectTransform>();
-        hlRt.anchorMin = Vector2.zero;
-        hlRt.anchorMax = Vector2.one;
-        hlRt.offsetMin = new Vector2(-4, -4);
-        hlRt.offsetMax = new Vector2(4, 4);
+        var hlGo = new GameObject("TrumpHighlight"); hlGo.transform.SetParent(root.transform,false);
+        var hlImg = hlGo.AddComponent<Image>(); hlImg.color = new Color(1f,0.84f,0f,0.45f);
+        FillParentExpanded(hlGo.GetComponent<RectTransform>(), 3);
         hlGo.SetActive(false);
 
         var cv = root.AddComponent<CardView>();
-        cv.RankText       = tmp;
-        cv.SuitText       = tmp;
-        cv.CardBackground = bg;
-        cv.TrumpHighlight = hlImg;
+        cv.CardLabel       = t;
+        cv.CardBackground  = bg;
+        cv.TrumpHighlight  = hlImg;
+        root.AddComponent<Button>();
 
-        // Pas de Button (cartes sur la table ne sont pas cliquables)
-
-        PrefabUtility.SaveAsPrefabAsset(root, $"{folder}/TrickCardPrefab.prefab");
+        PrefabUtility.SaveAsPrefabAsset(root, dir+"/CardPrefab.prefab");
         Object.DestroyImmediate(root);
     }
 
-    // ── Helpers de création UI ────────────────────────────────────────────────
-
-    static GameObject CreateGO(string name)
+    static void MakeCardBackPrefab(string dir)
     {
-        var go = new GameObject(name);
-        go.AddComponent<RectTransform>();
+        var root = new GameObject("CardBackPrefab");
+        var rt = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(72,100);
+        var bg = root.AddComponent<Image>(); bg.color = new Color(0.12f,0.25f,0.60f);
+        PrefabUtility.SaveAsPrefabAsset(root, dir+"/CardBackPrefab.prefab");
+        Object.DestroyImmediate(root);
+    }
+
+    static void MakeTrickCardPrefab(string dir)
+    {
+        var root = new GameObject("TrickCardPrefab");
+        root.AddComponent<CanvasGroup>();
+        var rt = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(80,112);
+        var bg = root.AddComponent<Image>(); bg.color = Color.white;
+
+        var txtGo = new GameObject("CardLabel"); txtGo.transform.SetParent(root.transform,false);
+        var t = txtGo.AddComponent<Text>();
+        t.text = "A♠"; t.fontSize = 22; t.color = new Color(0.1f,0.1f,0.1f);
+        t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
+        FillParent(txtGo.GetComponent<RectTransform>());
+
+        var hlGo  = new GameObject("TrumpHighlight"); hlGo.transform.SetParent(root.transform,false);
+        var hlImg = hlGo.AddComponent<Image>(); hlImg.color = new Color(1f,0.84f,0f,0.55f);
+        FillParentExpanded(hlGo.GetComponent<RectTransform>(), 4);
+        hlGo.SetActive(false);
+
+        var cv = root.AddComponent<CardView>();
+        cv.CardLabel = t; cv.CardBackground = bg; cv.TrumpHighlight = hlImg;
+
+        PrefabUtility.SaveAsPrefabAsset(root, dir+"/TrickCardPrefab.prefab");
+        Object.DestroyImmediate(root);
+    }
+
+    // ── Helpers UI ────────────────────────────────────────────────────────────
+    static Vector2 AnchorTop  = new Vector2(0.5f,1f);
+    static Vector2 AnchorBot  = new Vector2(0.5f,0f);
+    static Vector2 AnchorBotL = new Vector2(0f,0f);
+    static Vector2 AnchorLeft = new Vector2(0f,0.5f);
+    static Vector2 AnchorRight= new Vector2(1f,0.5f);
+    static Vector2 AnchorMid  = new Vector2(0.5f,0.5f);
+
+    static GameObject Panel(string name, Transform parent, Vector2 size,
+        Vector2 anchor, Vector2 pos, Color col)
+    {
+        var go = new GameObject(name); go.transform.SetParent(parent,false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = anchor; rt.anchoredPosition = pos; rt.sizeDelta = size;
+        if (col.a > 0.01f) { var img = go.AddComponent<Image>(); img.color = col; img.raycastTarget = false; }
         return go;
     }
 
-    static GameObject CreatePanel(string name, Transform parent, Vector2 size,
-        Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPos, Color color)
+    static Text Lbl(string name, string txt, Transform parent, Vector2 pos,
+        float size, Color col, bool bold)
     {
-        var go = new GameObject(name);
-        go.transform.SetParent(parent, false);
+        var go = new GameObject(name); go.transform.SetParent(parent,false);
         var rt = go.AddComponent<RectTransform>();
-        rt.anchorMin        = anchorMin;
-        rt.anchorMax        = anchorMax;
-        rt.anchoredPosition = anchoredPos;
-        rt.sizeDelta        = size;
+        rt.anchorMin = rt.anchorMax = AnchorMid; rt.anchoredPosition = pos; rt.sizeDelta = new Vector2(400,50);
+        var t = go.AddComponent<Text>();
+        t.text = txt; t.fontSize = (int)size; t.color = col;
+        t.alignment = TextAnchor.MiddleCenter;
+        t.fontStyle = bold ? FontStyle.Bold : FontStyle.Normal;
+        t.raycastTarget = false;
+        t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        return t;
+    }
 
-        if (color.a > 0.001f)
-        {
-            var img = go.AddComponent<Image>();
-            img.color = color;
-            // Arrondir les coins (Unity 2020+)
-            img.raycastTarget = false;
+    static GameObject Btn(string name, Transform parent, string label,
+        Vector2 size, Vector2 anchor, Vector2 pos, Color col)
+    {
+        var go = new GameObject(name); go.transform.SetParent(parent,false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = anchor; rt.anchoredPosition = pos; rt.sizeDelta = size;
+        var img = go.AddComponent<Image>(); img.color = col;
+        go.AddComponent<Button>();
+
+        var tGo = new GameObject("Label"); tGo.transform.SetParent(go.transform,false);
+        FillParent(tGo.AddComponent<RectTransform>());
+        var t = tGo.AddComponent<Text>();
+        t.text = label; t.fontSize = 17; t.color = Color.white;
+        t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
+        t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        return go;
+    }
+
+    static GameObject Container(string name, Transform parent, Vector2 pos, Vector2 size, bool horiz)
+    {
+        var go = new GameObject(name); go.transform.SetParent(parent,false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = AnchorMid; rt.anchoredPosition = pos; rt.sizeDelta = size;
+        if (horiz) {
+            var h = go.AddComponent<HorizontalLayoutGroup>();
+            h.spacing = 4; h.childAlignment = TextAnchor.MiddleCenter;
+            h.childControlWidth = false; h.childControlHeight = false;
+            h.childForceExpandWidth = false; h.childForceExpandHeight = false;
+        } else {
+            var v = go.AddComponent<VerticalLayoutGroup>();
+            v.spacing = 4; v.childAlignment = TextAnchor.MiddleCenter;
+            v.childControlWidth = false; v.childControlHeight = false;
+            v.childForceExpandWidth = false; v.childForceExpandHeight = false;
         }
         return go;
     }
 
-    static GameObject CreateLabel(string name, string text, Transform parent,
-        Vector2 anchoredPos, float fontSize, Color color, FontStyles style)
+    static GameObject Slot(string name, Transform parent, Vector2 pos)
     {
-        var go = new GameObject(name);
-        go.transform.SetParent(parent, false);
+        var go = new GameObject(name); go.transform.SetParent(parent,false);
         var rt = go.AddComponent<RectTransform>();
-        rt.anchoredPosition = anchoredPos;
-        rt.sizeDelta        = new Vector2(400, 50);
-        var tmp = go.AddComponent<TextMeshProUGUI>();
-        tmp.text       = text;
-        tmp.fontSize   = fontSize;
-        tmp.color      = color;
-        tmp.fontStyle  = style;
-        tmp.alignment  = TextAlignmentOptions.Center;
-        tmp.raycastTarget = false;
+        rt.anchorMin = rt.anchorMax = AnchorMid; rt.anchoredPosition = pos; rt.sizeDelta = new Vector2(88,118);
         return go;
     }
 
-    static GameObject CreateButton(string name, Transform parent, string label,
-        Vector2 size, Vector2 pivot, Vector2 anchor, Vector2 pos, Color color)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(parent, false);
-        var rt = go.AddComponent<RectTransform>();
-        rt.pivot            = pivot;
-        rt.anchorMin        = anchor;
-        rt.anchorMax        = anchor;
-        rt.anchoredPosition = pos;
-        rt.sizeDelta        = size;
+    static void FillParent(RectTransform rt)
+    { rt.anchorMin=Vector2.zero; rt.anchorMax=Vector2.one; rt.offsetMin=rt.offsetMax=Vector2.zero; }
 
-        var img = go.AddComponent<Image>();
-        img.color = color;
-
-        var btn = go.AddComponent<Button>();
-        var cs  = btn.colors;
-        cs.highlightedColor = color * 1.2f;
-        cs.pressedColor     = color * 0.8f;
-        btn.colors = cs;
-
-        var txtGo = new GameObject("Label");
-        txtGo.transform.SetParent(go.transform, false);
-        var txtRt = txtGo.AddComponent<RectTransform>();
-        txtRt.anchorMin = Vector2.zero;
-        txtRt.anchorMax = Vector2.one;
-        txtRt.offsetMin = Vector2.zero;
-        txtRt.offsetMax = Vector2.zero;
-        var tmp = txtGo.AddComponent<TextMeshProUGUI>();
-        tmp.text      = label;
-        tmp.fontSize  = 18;
-        tmp.color     = Color.white;
-        tmp.alignment = TextAlignmentOptions.Center;
-        tmp.fontStyle = FontStyles.Bold;
-
-        return go;
-    }
-
-    static GameObject CreateContainer(string name, Transform parent, Vector2 pos,
-        Vector2 size, bool horizontal, float spacing)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(parent, false);
-        var rt = go.AddComponent<RectTransform>();
-        rt.anchoredPosition = pos;
-        rt.sizeDelta        = size;
-
-        var layout = go.AddComponent<HorizontalOrVerticalLayoutGroup>();
-        // layout sera HorizontalLayoutGroup ou VerticalLayoutGroup selon bool
-        Object.DestroyImmediate(layout);
-
-        if (horizontal)
-        {
-            var hlg = go.AddComponent<HorizontalLayoutGroup>();
-            hlg.spacing              = spacing;
-            hlg.childAlignment       = TextAnchor.MiddleCenter;
-            hlg.childControlWidth    = false;
-            hlg.childControlHeight   = false;
-            hlg.childForceExpandWidth  = false;
-            hlg.childForceExpandHeight = false;
-        }
-        else
-        {
-            var vlg = go.AddComponent<VerticalLayoutGroup>();
-            vlg.spacing              = spacing;
-            vlg.childAlignment       = TextAnchor.MiddleCenter;
-            vlg.childControlWidth    = false;
-            vlg.childControlHeight   = false;
-            vlg.childForceExpandWidth  = false;
-            vlg.childForceExpandHeight = false;
-        }
-        return go;
-    }
-
-    static GameObject CreateSlot(string name, Transform parent, Vector2 pos)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(parent, false);
-        var rt = go.AddComponent<RectTransform>();
-        rt.anchoredPosition = pos;
-        rt.sizeDelta        = new Vector2(88, 120);
-        return go;
-    }
+    static void FillParentExpanded(RectTransform rt, float expand)
+    { rt.anchorMin=Vector2.zero; rt.anchorMax=Vector2.one;
+      rt.offsetMin=new Vector2(-expand,-expand); rt.offsetMax=new Vector2(expand,expand); }
 }
