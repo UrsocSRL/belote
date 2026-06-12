@@ -9,8 +9,8 @@ namespace BeloteFreeze.UI
     [RequireComponent(typeof(RectTransform))]
     public class TableOrientationController : MonoBehaviour
     {
-        public Vector2 PortraitSize  = new Vector2(420, 600);
-        public Vector2 LandscapeSize = new Vector2(640, 380);
+        public Vector2 PortraitSize  = new Vector2(840, 740);
+        public Vector2 LandscapeSize = new Vector2(1000, 740);
 
         RectTransform _rt;
         bool _lastLandscape;

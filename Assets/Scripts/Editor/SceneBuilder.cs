@@ -74,37 +74,37 @@ public static class SceneBuilder
                       Lbl("LblEux", "Eux",      scoreP.transform, new Vector2( 200,-26),13, new Color(.9f,.6f,.6f), false);
 
         // ── IA HAUT (Nord) ─────────────────────────────────────────────────────
-        var aiTopZ  = Pnl("AITopZone",  cvT, new Vector2(720,120), ATop, new Vector2(0,-135), Color.clear);
-                      Lbl("LblNord","Nord", aiTopZ.transform, new Vector2(0,44), 13, C_AILBL, false);
-        var avNord  = Img("AvatarNord", aiTopZ.transform, new Vector2(-330,10), new Vector2(56,56));
-        var aiTopH  = Ctr("AITopHand",  aiTopZ.transform, Vector2.zero, new Vector2(700,80),  true);
+        var aiTopZ  = Pnl("AITopZone",  cvT, new Vector2(760,180), ATop, new Vector2(0,-145), Color.clear);
+                      Lbl("LblNord","Nord", aiTopZ.transform, new Vector2(0,74), 13, C_AILBL, false);
+        var avNord  = Img("AvatarNord", aiTopZ.transform, new Vector2(-350,20), new Vector2(56,56));
+        var aiTopH  = Ctr("AITopHand",  aiTopZ.transform, Vector2.zero, new Vector2(740,140),  true);
 
         // ── IA GAUCHE (Ouest) ──────────────────────────────────────────────────
-        var aiLftZ  = Pnl("AILeftZone",  cvT, new Vector2(110,400), ALeft, new Vector2(58,0),  Color.clear);
-                      Lbl("LblOuest","Ouest", aiLftZ.transform, new Vector2(0,165), 13, C_AILBL, false);
-        var avOuest = Img("AvatarOuest", aiLftZ.transform, new Vector2(0,195), new Vector2(56,56));
-        var aiLftH  = Ctr("AILeftHand",  aiLftZ.transform, Vector2.zero, new Vector2(80,360),  false);
+        var aiLftZ  = Pnl("AILeftZone",  cvT, new Vector2(130,460), ALeft, new Vector2(68,0),  Color.clear);
+                      Lbl("LblOuest","Ouest", aiLftZ.transform, new Vector2(0,195), 13, C_AILBL, false);
+        var avOuest = Img("AvatarOuest", aiLftZ.transform, new Vector2(0,225), new Vector2(56,56));
+        var aiLftH  = Ctr("AILeftHand",  aiLftZ.transform, Vector2.zero, new Vector2(100,420),  false);
 
         // ── IA DROITE (Est) ────────────────────────────────────────────────────
-        var aiRgtZ  = Pnl("AIRightZone", cvT, new Vector2(110,400), ARight, new Vector2(-58,0), Color.clear);
-                      Lbl("LblEst","Est", aiRgtZ.transform, new Vector2(0,165), 13, C_AILBL, false);
-        var avEst   = Img("AvatarEst", aiRgtZ.transform, new Vector2(0,195), new Vector2(56,56));
-        var aiRgtH  = Ctr("AIRightHand", aiRgtZ.transform, Vector2.zero, new Vector2(80,360),  false);
+        var aiRgtZ  = Pnl("AIRightZone", cvT, new Vector2(130,460), ARight, new Vector2(-68,0), Color.clear);
+                      Lbl("LblEst","Est", aiRgtZ.transform, new Vector2(0,195), 13, C_AILBL, false);
+        var avEst   = Img("AvatarEst", aiRgtZ.transform, new Vector2(0,225), new Vector2(56,56));
+        var aiRgtH  = Ctr("AIRightHand", aiRgtZ.transform, Vector2.zero, new Vector2(100,420),  false);
 
         // ── TABLE (4 slots) ────────────────────────────────────────────────────
-        var tableZ  = Pnl("TableZone", cvT, new Vector2(420,370), AMid, new Vector2(0,55), Color.clear);
+        var tableZ  = Pnl("TableZone", cvT, new Vector2(840,740), AMid, new Vector2(0,55), Color.clear);
         var tableImgGo = new GameObject("TableImage"); tableImgGo.transform.SetParent(tableZ.transform,false);
         FillRT(tableImgGo.AddComponent<RectTransform>());
-        var tableImg = tableImgGo.AddComponent<Image>(); tableImg.raycastTarget = false; tableImg.preserveAspect = false;
+        var tableImg = tableImgGo.AddComponent<Image>(); tableImg.raycastTarget = false; tableImg.preserveAspect = true;
         tableZ.AddComponent<TableOrientationController>();
-        var slotS   = Slot("SlotSud",   tableZ.transform, new Vector2(  0,-115));
-        var slotO   = Slot("SlotOuest", tableZ.transform, new Vector2(-145,  0));
-        var slotN   = Slot("SlotNord",  tableZ.transform, new Vector2(  0, 115));
-        var slotE   = Slot("SlotEst",   tableZ.transform, new Vector2( 145,  0));
+        var slotS   = Slot("SlotSud",   tableZ.transform, new Vector2(   0,-230));
+        var slotO   = Slot("SlotOuest", tableZ.transform, new Vector2(-290,   0));
+        var slotN   = Slot("SlotNord",  tableZ.transform, new Vector2(   0, 230));
+        var slotE   = Slot("SlotEst",   tableZ.transform, new Vector2( 290,   0));
 
         // ── MAIN JOUEUR (Sud) ──────────────────────────────────────────────────
-        var handZ   = Pnl("HandZone", cvT, new Vector2(1080,200), ABot, new Vector2(0,108), Color.clear);
-        var humanH  = Ctr("HumanHand", handZ.transform, Vector2.zero, new Vector2(1040,188), true);
+        var handZ   = Pnl("HandZone", cvT, new Vector2(1080,260), ABot, new Vector2(0,135), Color.clear);
+        var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,240));
 
         // ── INFO BAR ───────────────────────────────────────────────────────────
         var infoP   = Pnl("InfoBar", cvT, new Vector2(790,44), ABot, new Vector2(0,316), C_PANLT);
@@ -291,7 +291,7 @@ public static class SceneBuilder
     static void MakeCardPrefab(string dir)
     {
         var root = new GameObject("CardPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(72,100);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(104,156);
         var bg   = root.AddComponent<Image>(); bg.color = Color.white;
         root.AddComponent<CanvasGroup>();
 
@@ -321,7 +321,7 @@ public static class SceneBuilder
     static void MakeCardBackPrefab(string dir)
     {
         var root = new GameObject("CardBackPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(72,100);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(90,135);
         var bg   = root.AddComponent<Image>(); bg.color = new Color(0.12f,0.25f,0.60f);
 
         var faceGo = new GameObject("CardFaceImage"); faceGo.transform.SetParent(root.transform,false);
@@ -338,7 +338,7 @@ public static class SceneBuilder
     static void MakeTrickCardPrefab(string dir)
     {
         var root = new GameObject("TrickCardPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(80,112);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(108,162);
         var bg   = root.AddComponent<Image>(); bg.color = Color.white;
         root.AddComponent<CanvasGroup>();
 
@@ -432,6 +432,15 @@ public static class SceneBuilder
             v.childControlWidth=false; v.childControlHeight=false;
             v.childForceExpandWidth=false; v.childForceExpandHeight=false;
         }
+        return go;
+    }
+
+    static GameObject FanContainer(string name, Transform parent, Vector2 pos, Vector2 size)
+    {
+        var go = new GameObject(name); go.transform.SetParent(parent,false);
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = AMid; rt.anchoredPosition = pos; rt.sizeDelta = size;
+        go.AddComponent<CardFanLayout>();
         return go;
     }
 
