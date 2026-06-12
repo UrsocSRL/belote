@@ -27,6 +27,18 @@ public static class SceneBuilder
     [MenuItem("BeloteFreeze/Build GameScene %#b")]
     public static void BuildScene()
     {
+        // Nettoyage : supprime les objets générés par une exécution précédente
+        // pour éviter les doublons (Canvas, UIManager, GameManager, EventSystem)
+        foreach (var name in new[] { "Canvas", "UIManager", "GameManager", "EventSystem" })
+        {
+            var existing = GameObject.Find(name);
+            while (existing != null)
+            {
+                Object.DestroyImmediate(existing);
+                existing = GameObject.Find(name);
+            }
+        }
+
         // Caméra
         var camGo = GameObject.FindWithTag("MainCamera")
                     ?? new GameObject("Main Camera");

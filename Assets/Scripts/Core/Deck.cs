@@ -59,12 +59,15 @@ namespace BeloteFreeze.Core
             foreach (int p in order)
                 for (int i = 0; i < 2; i++) hands[p].Add(Draw());
 
-            // Carte retournée
-            Card trumpCard = Draw();
-
-            // Tour 3 : 3 cartes chacun
+            // Tour 3 : 3 cartes chacun (32 cartes au total, 8 par joueur)
             foreach (int p in order)
                 for (int i = 0; i < 3; i++) hands[p].Add(Draw());
+
+            // Carte retournée : copie de la dernière carte du donneur,
+            // affichée pour la phase de prise d'atout (les 32 cartes
+            // sont déjà toutes distribuées, 8 par joueur).
+            var dealerLast = hands[dealerIndex][hands[dealerIndex].Count - 1];
+            Card trumpCard = new Card(dealerLast.Suit, dealerLast.Rank);
 
             return (hands, trumpCard);
         }
