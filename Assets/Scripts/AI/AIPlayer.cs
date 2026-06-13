@@ -61,14 +61,23 @@ namespace BeloteFreeze.AI
         }
 
         /// <summary>
-        /// Tour 1 — Prend si le joueur a le Valet de la couleur proposée
-        /// ou au moins 3 cartes de cette couleur.
+        /// Tour 1 — Règle de prise V2.
+        /// Cas 1 : Valet d'atout présent et ≥3 atouts au total après récupération
+        ///         de la carte retournée → PRENDRE.
+        /// Cas 2 : 9 d'atout présent, Valet absent, et ≥4 atouts au total après
+        ///         récupération de la carte retournée → PRENDRE.
+        /// Cas 3 : ni Valet ni 9 → PASSER, quelle que soit la force des autres cartes.
         /// </summary>
         public bool ShouldTakeTrump1(Player player, Card trumpCard)
         {
             var inSuit = player.GetSuit(trumpCard.Suit);
             bool hasJack = inSuit.Any(c => c.Rank == Rank.Jack);
-            return hasJack || inSuit.Count >= 3;
+            bool hasNine = inSuit.Any(c => c.Rank == Rank.Nine);
+            int totalAfterRecovery = inSuit.Count + 1; // + la carte retournée, récupérée par le preneur
+
+            if (hasJack && totalAfterRecovery >= 3) return true;
+            if (hasNine && !hasJack && totalAfterRecovery >= 4) return true;
+            return false;
         }
 
         /// <summary>
