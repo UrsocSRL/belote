@@ -35,6 +35,8 @@ namespace BeloteFreeze.AI
             _selector = new CardSelector(new ICardSelectionRule[]
             {
                 new TakerOpenWithJackRule(),
+                new TakerContinueTrumpChaseRule(),
+                new TakerFullTrumpControlRule(),
                 new OpenTrumpWithoutJackRule(),
                 new LeadCardRule(),
                 new PartnerMasterRule(),
