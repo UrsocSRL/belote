@@ -56,6 +56,9 @@ namespace BeloteFreeze.UI
         public GameObject LastTrickPanel;
         public Text       LastTrickText;
 
+        [Header("Table — Carte retournée")]
+        public Transform  TurnedCardSlot;
+
         [Header("Decor")]
         public CardArtSet CardArt;
         public Image      BackgroundImage;
@@ -65,6 +68,9 @@ namespace BeloteFreeze.UI
         readonly List<GameObject> _humanCardObjects = new();
         List<Card>      _currentHumanHand = new();
         List<TrickPlay> _lastTrickData    = new();
+
+        GameObject _turnedCardObj;
+        Coroutine  _turnedCardPulse;
 
         void Awake()
         {
@@ -113,12 +119,27 @@ namespace BeloteFreeze.UI
             ClearTrick();
             _lastTrickData.Clear();
             LastTrickButton?.gameObject.SetActive(false);
+            if (TrumpIndicatorText != null) TrumpIndicatorText.text = "";
+            HideTurnedCard();
+        }
+
+        /// <summary>
+        /// Met à jour l'affichage des mains après la distribution complémentaire.
+        /// </summary>
+        public void RefreshHands(Player[] players)
+        {
+            for (int ai = 0; ai < 3; ai++)
+                if (AIHandContainers != null && ai < AIHandContainers.Length)
+                    RenderAIBack(AIHandContainers[ai], players[ai + 1].Hand.Count);
+            _currentHumanHand = new List<Card>(players[0].Hand);
+            RenderHumanHand(_currentHumanHand);
         }
 
         public void OnTrumpAsk(int askerSeat, TrumpPhase phase, Card trumpCard)
         {
             TrumpPanel?.SetActive(true);
             if (TrumpCardText != null) TrumpCardText.text = trumpCard.ToString();
+            ShowTurnedCard(trumpCard);
             if (askerSeat == 0)
             {
                 if (phase == TrumpPhase.Round1)
@@ -151,8 +172,41 @@ namespace BeloteFreeze.UI
         public void OnTrumpChosen(Suit trump, int takerSeat)
         {
             TrumpPanel?.SetActive(false);
-            if (TrumpIndicatorText != null) TrumpIndicatorText.text = "Atout : " + SuitSymbol(trump);
+            HideTurnedCard();
+            if (TrumpIndicatorText != null) TrumpIndicatorText.text = "ATOUT " + SuitSymbol(trump) + " " + SuitName(trump);
             SetInfoBar(PlayerName(takerSeat) + " prend a " + SuitSymbol(trump));
+        }
+
+        // ── CARTE RETOURNEE (centre table) ────────────────────────────────────
+        void ShowTurnedCard(Card trumpCard)
+        {
+            if (_turnedCardObj == null)
+            {
+                var prefab = TrickCardPrefab ? TrickCardPrefab : CardPrefab;
+                if (!prefab || !TurnedCardSlot) return;
+                _turnedCardObj = Instantiate(prefab, TurnedCardSlot);
+                var cv = _turnedCardObj.GetComponent<CardView>();
+                if (cv != null) { cv.SetCard(trumpCard, default); cv.SetPlayable(false); }
+                _turnedCardPulse = StartCoroutine(PulseTurnedCard());
+            }
+        }
+
+        void HideTurnedCard()
+        {
+            if (_turnedCardPulse != null) { StopCoroutine(_turnedCardPulse); _turnedCardPulse = null; }
+            if (_turnedCardObj != null) { Destroy(_turnedCardObj); _turnedCardObj = null; }
+        }
+
+        IEnumerator PulseTurnedCard()
+        {
+            const float speed = 3f;
+            const float amplitude = 0.06f;
+            while (_turnedCardObj != null)
+            {
+                float scale = 1f + Mathf.Sin(Time.time * speed) * amplitude;
+                _turnedCardObj.transform.localScale = new Vector3(scale, scale, 1f);
+                yield return null;
+            }
         }
 
         public void OnPlayerTurn(int seat)
@@ -313,6 +367,9 @@ namespace BeloteFreeze.UI
             seat switch { 0=>"Vous", 1=>"Ouest", 2=>"Nord", 3=>"Est", _=>"?" };
 
         static string SuitSymbol(Suit s) =>
-            s switch { Suit.Spades=>"S", Suit.Hearts=>"H", Suit.Diamonds=>"D", Suit.Clubs=>"C", _=>"?" };
+            s switch { Suit.Spades=>"♠", Suit.Hearts=>"♥", Suit.Diamonds=>"♦", Suit.Clubs=>"♣", _=>"?" };
+
+        static string SuitName(Suit s) =>
+            s switch { Suit.Spades=>"Pique", Suit.Hearts=>"Coeur", Suit.Diamonds=>"Carreau", Suit.Clubs=>"Trefle", _=>"?" };
     }
 }

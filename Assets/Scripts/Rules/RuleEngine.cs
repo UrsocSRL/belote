@@ -141,6 +141,26 @@ namespace BeloteFreeze.Rules
         {
             return ((int)seat + 2) % 4;
         }
+
+        /// <summary>
+        /// Indique si deux sièges forment une paire de partenaires (0↔2, 1↔3).
+        /// </summary>
+        public static bool IsPartner(int seatA, int seatB)
+        {
+            return GetPartnerSeat((PlayerSeat)seatA) == seatB;
+        }
+
+        /// <summary>
+        /// Retourne la carte actuellement maîtresse du pli (respecte couleur demandée et atout).
+        /// </summary>
+        public static Card GetWinningCard(List<TrickPlay> trick, Suit trump)
+        {
+            if (trick.Count == 0) return null;
+            var best = trick[0];
+            for (int i = 1; i < trick.Count; i++)
+                if (trick[i].Card.Beats(best.Card, trump)) best = trick[i];
+            return best.Card;
+        }
     }
 
     /// <summary>

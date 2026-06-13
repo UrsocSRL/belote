@@ -114,6 +114,13 @@ public static class SceneBuilder
         var slotN   = Slot("SlotNord",  tableZ.transform, new Vector2(   0, 220));
         var slotE   = Slot("SlotEst",   tableZ.transform, new Vector2( 185,   0));
 
+        // ── CARTE RETOURNEE (centre table, phase de prise) ─────────────────────
+        var turnedGo = new GameObject("TurnedCardSlot"); turnedGo.transform.SetParent(tableZ.transform,false);
+        var turnedRt = turnedGo.AddComponent<RectTransform>();
+        turnedRt.anchorMin = turnedRt.anchorMax = AMid;
+        turnedRt.anchoredPosition = Vector2.zero;
+        turnedRt.sizeDelta = new Vector2(128,192);
+
         // ── MAIN JOUEUR (Sud) ──────────────────────────────────────────────────
         var handZ   = Pnl("HandZone", cvT, new Vector2(1080,320), ABot, new Vector2(0,160), Color.clear);
         var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,300));
@@ -214,6 +221,7 @@ public static class SceneBuilder
         uim.LastTrickButton      = lastBt.GetComponent<Button>();
         uim.LastTrickPanel       = lpPnl;
         uim.LastTrickText        = tLPTxt;
+        uim.TurnedCardSlot       = turnedRt;
 
         // ── DECOR / ART ────────────────────────────────────────────────────────
         var cardArt = BuildCardArtSet();

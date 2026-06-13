@@ -71,11 +71,13 @@ namespace BeloteFreeze.UI
             State.ResetRound();
             foreach (var p in _players) p.Hand.Clear();
 
-            var (hands, trumpCard) = _deck.Deal(State.DealerSeat);
+            var (hands, trumpCard) = _deck.DealInitial(State.DealerSeat);
             for (int i = 0; i < 4; i++) _players[i].SetHand(hands[i]);
 
+            Debug.Log($"[Belote] Nouvelle manche — Donneur : {_players[State.DealerSeat].Name} | Carte retournée : {trumpCard}");
+
             _trumpMgr.StartTrump(trumpCard, State.DealerSeat);
-            State.Phase = GamePhase.TrumpSelection;
+            State.Phase = GamePhase.FirstBiddingRound;
 
             UIManager?.OnDeal(_players, trumpCard);
             StartCoroutine(TrumpSelectionLoop());
@@ -86,6 +88,10 @@ namespace BeloteFreeze.UI
         {
             while (!_trumpMgr.IsComplete)
             {
+                State.Phase = _trumpMgr.Phase == TrumpPhase.Round2
+                    ? GamePhase.SecondBiddingRound
+                    : GamePhase.FirstBiddingRound;
+
                 int  asker   = _trumpMgr.CurrentAskerSeat;
                 bool isHuman = _players[asker].IsHuman;
 
@@ -106,6 +112,7 @@ namespace BeloteFreeze.UI
             if (_trumpMgr.Phase == TrumpPhase.Redeal)
             {
                 // Cas 14 — Nouvelle donne
+                Debug.Log("[Belote] Tout le monde passe — nouvelle donne");
                 UIManager?.ShowMessage("Tout le monde passe — nouvelle donne", 1.2f);
                 yield return new WaitForSeconds(1.5f);
                 State.DealerSeat = (State.DealerSeat + 1) % 4;
@@ -114,10 +121,17 @@ namespace BeloteFreeze.UI
             }
 
             // Atout validé
+            State.Phase           = GamePhase.CompletingDeal;
             State.Trump           = _trumpMgr.ChosenTrump!.Value;
             State.TakerSeat       = _trumpMgr.TakerSeat;
             State.TakerTeam       = _players[_trumpMgr.TakerSeat].TeamIndex;
             State.TrickLeaderSeat = (State.DealerSeat + 1) % 4;
+
+            Debug.Log($"[Belote] Atout choisi : {State.Trump} | Preneur : {_players[State.TakerSeat].Name}");
+
+            // Distribution complémentaire : amène toutes les mains à 8 cartes
+            var additions = _deck.DealComplement(State.DealerSeat, State.TakerSeat, _trumpMgr.TrumpCard);
+            for (int i = 0; i < 4; i++) _players[i].AddCards(additions[i]);
 
             _trickMgr.Reset(State.Trump);
             _beloteTracker.Reset(State.Trump);
@@ -128,6 +142,7 @@ namespace BeloteFreeze.UI
             State.Phase = GamePhase.Playing;
 
             UIManager?.OnTrumpChosen(State.Trump, State.TakerSeat);
+            UIManager?.RefreshHands(_players);
             yield return new WaitForSeconds(0.3f);
             StartCoroutine(PlayLoop());
         }
@@ -164,6 +179,8 @@ namespace BeloteFreeze.UI
                 State.CurrentPlayerSeat = leader;
                 State.Phase = GamePhase.Playing;
 
+                Debug.Log($"[Belote] Pli {_trickMgr.TrickCount + 1} — Meneur : {_players[leader].Name}");
+
                 // 4 joueurs jouent dans l'ordre
                 for (int i = 0; i < 4; i++)
                 {
@@ -197,6 +214,8 @@ namespace BeloteFreeze.UI
                 State.TricksWon[winnerSeat]++;
                 State.TrickLeaderSeat = winnerSeat;
 
+                Debug.Log($"[Belote] Pli remporté par {_players[winnerSeat].Name} ({pts} pts)");
+
                 UIManager?.OnTrickEnd(winnerSeat, pts);
                 yield return new WaitForSeconds(0.5f);
             }
@@ -228,6 +247,8 @@ namespace BeloteFreeze.UI
             _trickMgr.PlayCard(seat, card);
             _ai.RecordPlay(seat, card, leadSuit);
 
+            Debug.Log($"[Belote] {_players[seat].Name} joue {card}");
+
             // Cas 6/7 — Belote / Rebelote
             if (_beloteTracker.OnCardPlayed(seat, card, out string announcement))
             {
@@ -242,7 +263,7 @@ namespace BeloteFreeze.UI
         // ── FIN DE MANCHE ─────────────────────────────────────────────────────
         IEnumerator EndHand()
         {
-            State.Phase = GamePhase.RoundEnd;
+            State.Phase = GamePhase.Scoring;
 
             int usTotal   = State.TricksWon[0] + State.TricksWon[2];
             int themTotal = State.TricksWon[1] + State.TricksWon[3];

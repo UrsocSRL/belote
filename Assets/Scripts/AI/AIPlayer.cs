@@ -50,38 +50,30 @@ namespace BeloteFreeze.AI
         }
 
         /// <summary>
-        /// Priorité 1 — Décision prise d'atout tour 1.
-        /// Prendre si la main est suffisamment forte.
+        /// Tour 1 — Prend si le joueur a le Valet de la couleur proposée
+        /// ou au moins 3 cartes de cette couleur.
         /// </summary>
         public bool ShouldTakeTrump1(Player player, Card trumpCard)
         {
-            var trumpInHand = player.GetTrumps(trumpCard.Suit);
-            int score = trumpInHand.Count;
-            score += trumpInHand.Any(c => c.Rank == Rank.Jack)  ? 2 : 0;
-            score += trumpInHand.Any(c => c.Rank == Rank.Nine)  ? 1 : 0;
-            score += trumpInHand.Any(c => c.Rank == Rank.Ace)   ? 1 : 0;
-            return score >= 2;
+            var inSuit = player.GetSuit(trumpCard.Suit);
+            bool hasJack = inSuit.Any(c => c.Rank == Rank.Jack);
+            return hasJack || inSuit.Count >= 3;
         }
 
         /// <summary>
-        /// Priorité 1 — Décision prise d'atout tour 2.
-        /// Évaluer les couleurs et prendre si main suffisamment forte.
+        /// Tour 2 — Choisit une couleur (hors couleur exclue) si le joueur a
+        /// au moins 4 cartes de cette couleur, ou le Valet + le 9.
         /// </summary>
         public (bool take, Suit suit) ShouldTakeTrump2(Player player, Suit excluded)
         {
-            Suit bestSuit = excluded;
-            int bestScore = 0;
             foreach (Suit s in System.Enum.GetValues(typeof(Suit)))
             {
                 if (s == excluded) continue;
                 var inSuit = player.GetSuit(s);
-                int score = inSuit.Count;
-                score += inSuit.Any(c => c.Rank == Rank.Jack)  ? 2 : 0;
-                score += inSuit.Any(c => c.Rank == Rank.Nine)  ? 1 : 0;
-                score += inSuit.Any(c => c.Rank == Rank.Ace)   ? 1 : 0;
-                if (score > bestScore) { bestScore = score; bestSuit = s; }
+                bool hasJackAndNine = inSuit.Any(c => c.Rank == Rank.Jack) && inSuit.Any(c => c.Rank == Rank.Nine);
+                if (inSuit.Count >= 4 || hasJackAndNine) return (true, s);
             }
-            return bestScore >= 2 ? (true, bestSuit) : (false, excluded);
+            return (false, excluded);
         }
 
         /// <summary>
@@ -108,8 +100,8 @@ namespace BeloteFreeze.AI
             if (isLeading) return ChooseLeadCard(player, allowedCards);
 
             // ── PARTENAIRE MAÎTRE ────────────────────────────────────────────
-            // Anti-comportement : ne pas couper son partenaire
-            if (partnerIsMaster) return ChargeOrDiscard(player, allowedCards);
+            // Anti-comportement : ne pas couper son partenaire ni gaspiller un gros atout/As
+            if (partnerIsMaster) return Discard(allowedCards);
 
             // ── ADVERSAIRE MAÎTRE ────────────────────────────────────────────
             if (enemyIsMaster) return TryWinOrDiscard(player, allowedCards, currentTrick);
@@ -147,27 +139,6 @@ namespace BeloteFreeze.AI
             if (cheap.Any()) return cheap[0];
 
             // Défausse minimum
-            return Discard(allowed);
-        }
-
-        // ── CHARGER (partenaire maître) ──────────────────────────────────────
-        private Card ChargeOrDiscard(Player player, List<Card> allowed)
-        {
-            // Charger avec 10 ou As si possible (Priorité 4/5)
-            var big = allowed
-                .Where(c => c.Suit != _trump && (c.Rank == Rank.Ace || c.Rank == Rank.Ten))
-                .OrderByDescending(c => c.NormalValue())
-                .ToList();
-            if (big.Any()) return big[0];
-
-            // Pisser : jeter petite carte inutile (pas d'atout précieux)
-            var cheap = allowed
-                .Where(c => c.Suit != _trump && c.Rank != Rank.Ace && c.Rank != Rank.Ten)
-                .OrderBy(c => c.NormalOrder())
-                .ToList();
-            if (cheap.Any()) return cheap[0];
-
-            // En dernier recours, la moins chère
             return Discard(allowed);
         }
 

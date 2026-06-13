@@ -33,6 +33,11 @@ namespace BeloteFreeze.Core
             Hand = new List<Card>(cards);
         }
 
+        public void AddCards(List<Card> cards)
+        {
+            Hand.AddRange(cards);
+        }
+
         public bool RemoveCard(Card card)
         {
             return Hand.Remove(card);

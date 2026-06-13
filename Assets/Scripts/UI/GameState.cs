@@ -4,11 +4,13 @@ namespace BeloteFreeze.UI
 {
     public enum GamePhase
     {
-        Dealing,
-        TrumpSelection,
+        Distribution,
+        FirstBiddingRound,
+        SecondBiddingRound,
+        CompletingDeal,
         Playing,
         TrickEnd,
-        RoundEnd
+        Scoring
     }
 
     /// <summary>
@@ -36,7 +38,7 @@ namespace BeloteFreeze.UI
 
         public void ResetRound()
         {
-            Phase             = GamePhase.Dealing;
+            Phase             = GamePhase.Distribution;
             Trump             = default;
             TakerSeat         = -1;
             TakerTeam         = -1;

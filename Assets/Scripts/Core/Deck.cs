@@ -35,11 +35,12 @@ namespace BeloteFreeze.Core
         public int Count => _cards.Count;
 
         /// <summary>
-        /// Distribution officielle belote : 3+2 puis carte retournée puis 3
+        /// Distribution initiale officielle : 3 puis 2 cartes par joueur (5 au total),
+        /// puis une carte est retournée pour la phase de prise.
         /// dealerIndex : index du donneur (0=Sud/Joueur, 1=Ouest, 2=Nord, 3=Est)
-        /// Retourne les 4 mains et la carte retournée
+        /// Le paquet conserve les 11 cartes restantes pour la distribution complémentaire.
         /// </summary>
-        public (List<Card>[] hands, Card trumpCard) Deal(int dealerIndex)
+        public (List<Card>[] hands, Card trumpCard) DealInitial(int dealerIndex)
         {
             Build();
             Shuffle();
@@ -55,21 +56,37 @@ namespace BeloteFreeze.Core
             foreach (int p in order)
                 for (int i = 0; i < 3; i++) hands[p].Add(Draw());
 
-            // Tour 2 : 2 cartes chacun
+            // Tour 2 : 2 cartes chacun (5 cartes au total par joueur)
             foreach (int p in order)
                 for (int i = 0; i < 2; i++) hands[p].Add(Draw());
 
-            // Tour 3 : 3 cartes chacun (32 cartes au total, 8 par joueur)
-            foreach (int p in order)
-                for (int i = 0; i < 3; i++) hands[p].Add(Draw());
-
-            // Carte retournée : copie de la dernière carte du donneur,
-            // affichée pour la phase de prise d'atout (les 32 cartes
-            // sont déjà toutes distribuées, 8 par joueur).
-            var dealerLast = hands[dealerIndex][hands[dealerIndex].Count - 1];
-            Card trumpCard = new Card(dealerLast.Suit, dealerLast.Rank);
+            // Carte retournée, proposée comme atout
+            Card trumpCard = Draw();
 
             return (hands, trumpCard);
+        }
+
+        /// <summary>
+        /// Distribution complémentaire après la prise : le preneur reçoit la carte
+        /// retournée + 2 cartes, les autres joueurs reçoivent 3 cartes, pour
+        /// atteindre 8 cartes chacun (épuise les 11 cartes restantes du paquet).
+        /// </summary>
+        public List<Card>[] DealComplement(int dealerIndex, int takerSeat, Card trumpCard)
+        {
+            var additions = new List<Card>[4];
+            for (int i = 0; i < 4; i++) additions[i] = new List<Card>();
+
+            int[] order = new int[4];
+            for (int i = 0; i < 4; i++) order[i] = (dealerIndex + 1 + i) % 4;
+
+            foreach (int seat in order)
+            {
+                if (seat == takerSeat) additions[seat].Add(trumpCard);
+                int need = seat == takerSeat ? 2 : 3;
+                for (int i = 0; i < need; i++) additions[seat].Add(Draw());
+            }
+
+            return additions;
         }
     }
 }
