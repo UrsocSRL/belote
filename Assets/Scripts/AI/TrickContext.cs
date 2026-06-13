@@ -33,6 +33,12 @@ namespace BeloteFreeze.AI
         /// <summary>Couleurs dont chaque siège est connu comme étant dépourvu.</summary>
         public HashSet<Suit>[] SuitVoids;
 
+        /// <summary>Siège du preneur de la manche en cours.</summary>
+        public int TakerSeat;
+
+        /// <summary>Vrai si ce joueur est le preneur de la manche en cours.</summary>
+        public bool IsTaker;
+
         /// <summary>Vrai si le joueur entame le pli (CurrentTrick vide).</summary>
         public bool IsLeading;
 
@@ -57,7 +63,8 @@ namespace BeloteFreeze.AI
             List<TrickPlay> currentTrick,
             Suit trump,
             List<Card> playedCards,
-            HashSet<Suit>[] suitVoids)
+            HashSet<Suit>[] suitVoids,
+            int takerSeat)
         {
             var ctx = new TrickContext
             {
@@ -70,6 +77,8 @@ namespace BeloteFreeze.AI
                 Trump        = trump,
                 PlayedCards  = playedCards,
                 SuitVoids    = suitVoids,
+                TakerSeat    = takerSeat,
+                IsTaker      = (int)player.Seat == takerSeat,
                 IsLeading    = currentTrick.Count == 0,
             };
 

@@ -21,6 +21,7 @@ namespace BeloteFreeze.AI
         private readonly List<Card>       _playedCards = new();
         private readonly HashSet<Suit>[]  _suitVoid;   // couleurs épuisées par joueur
         private Suit                      _trump;
+        private int                       _takerSeat = -1;
         private readonly CardSelector     _selector;
 
         public AIPlayer()
@@ -33,6 +34,7 @@ namespace BeloteFreeze.AI
             // experte viendront s'insérer ici, dans l'ordre voulu.
             _selector = new CardSelector(new ICardSelectionRule[]
             {
+                new OpenTrumpWithoutJackRule(),
                 new LeadCardRule(),
                 new PartnerMasterRule(),
                 new OpponentMasterRule(),
@@ -40,9 +42,10 @@ namespace BeloteFreeze.AI
             });
         }
 
-        public void Reset(Suit trump)
+        public void Reset(Suit trump, int takerSeat)
         {
-            _trump = trump;
+            _trump     = trump;
+            _takerSeat = takerSeat;
             _playedCards.Clear();
             for (int i = 0; i < 4; i++) _suitVoid[i].Clear();
         }
@@ -106,7 +109,7 @@ namespace BeloteFreeze.AI
             List<Card> allowedCards,
             List<TrickPlay> currentTrick)
         {
-            var ctx = TrickContext.Build(player, allowedCards, currentTrick, _trump, _playedCards, _suitVoid);
+            var ctx = TrickContext.Build(player, allowedCards, currentTrick, _trump, _playedCards, _suitVoid, _takerSeat);
             return _selector.ChooseBestCard(ctx);
         }
 

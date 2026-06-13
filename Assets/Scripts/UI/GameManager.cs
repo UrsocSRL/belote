@@ -153,7 +153,7 @@ namespace BeloteFreeze.UI
             _trickMgr.Reset(State.Trump);
             _beloteTracker.Reset(State.Trump);
             _beloteTracker.DetectHolder(_players);
-            _ai.Reset(State.Trump);
+            _ai.Reset(State.Trump, State.TakerSeat);
 
             State.BeloteHolderSeat = _beloteTracker.HolderSeat;
             State.Phase = GamePhase.Playing;
