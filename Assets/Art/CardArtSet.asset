@@ -1,0 +1,120 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8911f2693821402bb0ddd069277ed357, type: 3}
+  m_Name: CardArtSet
+  m_EditorClassIdentifier: Assembly-CSharp::BeloteFreeze.UI.CardArtSet
+  Cards:
+  - Suit: 0
+    Rank: 7
+    Sprite: {fileID: 21300000, guid: dca131a90ba34f1385fa99ef438c58b6, type: 3}
+  - Suit: 0
+    Rank: 5
+    Sprite: {fileID: 21300000, guid: ff07aa8fc1ab40f8b15b2433baa8c8ef, type: 3}
+  - Suit: 0
+    Rank: 4
+    Sprite: {fileID: 21300000, guid: c2c81db285fc49929a0412a86f082281, type: 3}
+  - Suit: 0
+    Rank: 3
+    Sprite: {fileID: 21300000, guid: f437d9d267ac4957aa10a1b4f2ee92cc, type: 3}
+  - Suit: 0
+    Rank: 6
+    Sprite: {fileID: 21300000, guid: a7abec737b7d441390ae62a07f863477, type: 3}
+  - Suit: 0
+    Rank: 2
+    Sprite: {fileID: 21300000, guid: ebe0a9ed26914fef845cae137d20d1dc, type: 3}
+  - Suit: 0
+    Rank: 1
+    Sprite: {fileID: 21300000, guid: 9fd60b3306a5460a8e55b1ae14b126c7, type: 3}
+  - Suit: 0
+    Rank: 0
+    Sprite: {fileID: 21300000, guid: 9ed5871ca48b4b53ad1c4be5e0aa91e1, type: 3}
+  - Suit: 1
+    Rank: 7
+    Sprite: {fileID: 21300000, guid: d004cc544a7e40a280342abdc348b273, type: 3}
+  - Suit: 1
+    Rank: 5
+    Sprite: {fileID: 21300000, guid: e8f07d52e20f4e6a903d2211c32d10ac, type: 3}
+  - Suit: 1
+    Rank: 4
+    Sprite: {fileID: 21300000, guid: 67dc535ae032498dbb25f22060e04c71, type: 3}
+  - Suit: 1
+    Rank: 3
+    Sprite: {fileID: 21300000, guid: deaa30efffbf4bbbbe6b3f5678e88a49, type: 3}
+  - Suit: 1
+    Rank: 6
+    Sprite: {fileID: 21300000, guid: fd70141ee1d549c2a37e713a31eda13b, type: 3}
+  - Suit: 1
+    Rank: 2
+    Sprite: {fileID: 21300000, guid: a51af498d6d741b98cb4179a5c1c33e2, type: 3}
+  - Suit: 1
+    Rank: 1
+    Sprite: {fileID: 21300000, guid: 88e4b39e7580420d84aa584aed5b1d5d, type: 3}
+  - Suit: 1
+    Rank: 0
+    Sprite: {fileID: 21300000, guid: 5e8f549d699d42d7a9b914078cba723d, type: 3}
+  - Suit: 2
+    Rank: 7
+    Sprite: {fileID: 21300000, guid: e646b1f34837422f924d5ef8b55ac74d, type: 3}
+  - Suit: 2
+    Rank: 5
+    Sprite: {fileID: 21300000, guid: 594a5a697b904879a74bc185be32f5c7, type: 3}
+  - Suit: 2
+    Rank: 4
+    Sprite: {fileID: 21300000, guid: 0f58dd5a9c214fa99fee181eab8c19e4, type: 3}
+  - Suit: 2
+    Rank: 3
+    Sprite: {fileID: 21300000, guid: 284ab332eeaf458490907875e2c303f0, type: 3}
+  - Suit: 2
+    Rank: 6
+    Sprite: {fileID: 21300000, guid: de73105c667f4954aec11cf9343f08a1, type: 3}
+  - Suit: 2
+    Rank: 2
+    Sprite: {fileID: 21300000, guid: 29321f1fe1e040cb9085b9e259732670, type: 3}
+  - Suit: 2
+    Rank: 1
+    Sprite: {fileID: 21300000, guid: 355ac6f5448b4796b82b3cb917bd290c, type: 3}
+  - Suit: 2
+    Rank: 0
+    Sprite: {fileID: 21300000, guid: de57f1be33a24c82a17b30647316145a, type: 3}
+  - Suit: 3
+    Rank: 7
+    Sprite: {fileID: 21300000, guid: 595c7bca88ab466aae8d5841604ec606, type: 3}
+  - Suit: 3
+    Rank: 5
+    Sprite: {fileID: 21300000, guid: e375b09c1d19494b9258ccfac32af6c5, type: 3}
+  - Suit: 3
+    Rank: 4
+    Sprite: {fileID: 21300000, guid: f2a17670fd8545c09d361029c9f4bb4d, type: 3}
+  - Suit: 3
+    Rank: 3
+    Sprite: {fileID: 21300000, guid: 6b6740be98b44708afcdce7d02c41e2e, type: 3}
+  - Suit: 3
+    Rank: 6
+    Sprite: {fileID: 21300000, guid: 032c9efa7c2145d7ad32df044a152123, type: 3}
+  - Suit: 3
+    Rank: 2
+    Sprite: {fileID: 21300000, guid: cf22ee6fd047419db2e04e51fd608c77, type: 3}
+  - Suit: 3
+    Rank: 1
+    Sprite: {fileID: 21300000, guid: 32e67f8cedb54d9a9b2470432d5822a6, type: 3}
+  - Suit: 3
+    Rank: 0
+    Sprite: {fileID: 21300000, guid: 3e548f65e7734fefa6baf365149611b8, type: 3}
+  CardBack: {fileID: 21300000, guid: 64e5da88b55d4a9d87f2a1f8b4be9172, type: 3}
+  Background: {fileID: 21300000, guid: cd3efb3984984480b5ff4e0ef13417fc, type: 3}
+  Table: {fileID: 21300000, guid: a18db06acbc8425ab2e4ed816a6975e4, type: 3}
+  AvatarMale: {fileID: 21300000, guid: 3aea3e8bf0574b4ea4c4d230ae35634d, type: 3}
+  AvatarFemale: {fileID: 21300000, guid: f2453db3efc0416c81248e006c842007, type: 3}
+  IconSpades: {fileID: 21300000, guid: 18954eb394d248f4adbe34b19e57aaa9, type: 3}
+  IconHearts: {fileID: 21300000, guid: ae324a4b0adf4e098eb385e452448525, type: 3}
+  IconDiamonds: {fileID: 21300000, guid: 6fec1412f4594c3b9012ed6cba826a59, type: 3}
+  IconClubs: {fileID: 21300000, guid: 035e3d575c23486d80dba9829ee70686, type: 3}
