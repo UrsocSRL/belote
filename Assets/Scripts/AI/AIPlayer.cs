@@ -7,12 +7,11 @@ namespace BeloteFreeze.AI
 {
     /// <summary>
     /// IA Officielle V1 — Bible IA Officielle V1
-    /// Priorités :
-    ///   1. Respect absolu des règles (cartes autorisées par RuleEngine)
-    ///   2. Gagner un pli au coût minimal
-    ///   3. Conserver les gros atouts : Valet, 9, As, 10
-    ///   4. Préserver les As
-    ///   5. Préserver les Dix
+    /// La sélection de carte passe systématiquement par <see cref="CardSelector"/>,
+    /// qui évalue une liste ordonnée de règles (<see cref="ICardSelectionRule"/>) :
+    /// chacune représente une "situation de référence" de la bible comportementale.
+    /// Cette architecture est conçue pour accueillir des centaines de situations
+    /// supplémentaires sans modifier ChooseCard.
     /// Anti-comportements : ne jamais couper son partenaire,
     ///   ne pas jeter un As inutilement, ne pas gaspiller un gros atout.
     /// </summary>
@@ -22,11 +21,23 @@ namespace BeloteFreeze.AI
         private readonly List<Card>       _playedCards = new();
         private readonly HashSet<Suit>[]  _suitVoid;   // couleurs épuisées par joueur
         private Suit                      _trump;
+        private readonly CardSelector     _selector;
 
         public AIPlayer()
         {
             _suitVoid = new HashSet<Suit>[4];
             for (int i = 0; i < 4; i++) _suitVoid[i] = new HashSet<Suit>();
+
+            // Ordre de priorité des situations : la première règle applicable
+            // détermine la carte jouée. Les futures situations de la bible IA
+            // experte viendront s'insérer ici, dans l'ordre voulu.
+            _selector = new CardSelector(new ICardSelectionRule[]
+            {
+                new LeadCardRule(),
+                new PartnerMasterRule(),
+                new OpponentMasterRule(),
+                new DefaultDiscardRule(), // toujours applicable — garantit un retour
+            });
         }
 
         public void Reset(Suit trump)
@@ -77,109 +88,17 @@ namespace BeloteFreeze.AI
         }
 
         /// <summary>
-        /// Choisit la meilleure carte à jouer parmi les cartes autorisées.
-        /// Respecte toutes les priorités de la bible IA V1.
+        /// Point d'entrée unique de sélection de carte. Construit le contexte
+        /// de décision (<see cref="TrickContext"/>) puis délègue au
+        /// <see cref="CardSelector"/>.
         /// </summary>
         public Card ChooseCard(
             Player player,
             List<Card> allowedCards,
             List<TrickPlay> currentTrick)
         {
-            if (allowedCards.Count == 1) return allowedCards[0];
-
-            int mySeat    = (int)player.Seat;
-            int partner   = RuleEngine.GetPartnerSeat(player.Seat);
-            bool isLeading = currentTrick.Count == 0;
-
-            // Gagnant actuel du pli
-            int curWinner = isLeading ? -1 : RuleEngine.GetTrickWinner(currentTrick, _trump);
-            bool partnerIsMaster = !isLeading && curWinner == partner;
-            bool enemyIsMaster   = !isLeading && curWinner >= 0 && curWinner != mySeat && curWinner != partner;
-
-            // ── ENTAME ──────────────────────────────────────────────────────
-            if (isLeading) return ChooseLeadCard(player, allowedCards);
-
-            // ── PARTENAIRE MAÎTRE ────────────────────────────────────────────
-            // Anti-comportement : ne pas couper son partenaire ni gaspiller un gros atout/As
-            if (partnerIsMaster) return Discard(allowedCards);
-
-            // ── ADVERSAIRE MAÎTRE ────────────────────────────────────────────
-            if (enemyIsMaster) return TryWinOrDiscard(player, allowedCards, currentTrick);
-
-            // ── DÉFAUT ───────────────────────────────────────────────────────
-            return Discard(allowedCards);
-        }
-
-        // ── ENTAME ──────────────────────────────────────────────────────────
-        private Card ChooseLeadCard(Player player, List<Card> allowed)
-        {
-            // Priorité 4 — As maître hors atout
-            var masterAces = allowed.Where(c =>
-                c.Rank == Rank.Ace &&
-                c.Suit != _trump &&
-                !_playedCards.Any(p => p.Suit == c.Suit && p.Rank == Rank.Ace) &&
-                !_suitVoid.Where((_, i) => i != (int)player.Seat).Any(v => v.Contains(c.Suit))
-            ).ToList();
-            if (masterAces.Any()) return masterAces[0];
-
-            // Tirer atout si main forte en atout (Priorité 3)
-            var myTrumps = allowed.Where(c => c.Suit == _trump).ToList();
-            if (myTrumps.Count >= 3)
-            {
-                // Tirer avec le plus petit atout pour économiser les gros
-                return myTrumps.OrderBy(c => c.TrumpOrder()).First();
-            }
-
-            // Priorité 5 — Éviter de jouer les Dix
-            // Jouer petite carte inutile
-            var cheap = allowed
-                .Where(c => c.Suit != _trump && c.Rank != Rank.Ace && c.Rank != Rank.Ten)
-                .OrderBy(c => c.NormalOrder())
-                .ToList();
-            if (cheap.Any()) return cheap[0];
-
-            // Défausse minimum
-            return Discard(allowed);
-        }
-
-        // ── TENTER DE GAGNER (adversaire maître) ────────────────────────────
-        private Card TryWinOrDiscard(Player player, List<Card> allowed, List<TrickPlay> trick)
-        {
-            // Trouver les cartes qui gagnent le pli
-            var winning = allowed.Where(c =>
-            {
-                var mockTrick = new List<TrickPlay>(trick) { new TrickPlay((int)player.Seat, c) };
-                return RuleEngine.GetTrickWinner(mockTrick, _trump) == (int)player.Seat;
-            }).ToList();
-
-            if (winning.Any())
-            {
-                // Priorité 2 — Gagner au coût minimal
-                // Priorité 3 — Éviter Valet/9 d'atout si possible
-                var cheapWin = winning
-                    .OrderBy(c => c.Value(_trump))
-                    .ToList();
-
-                // Anti-comportement : ne pas gaspiller un gros atout si un cheap suffit
-                var nonBigTrump = cheapWin.FirstOrDefault(c =>
-                    !(c.Suit == _trump && (c.Rank == Rank.Jack || c.Rank == Rank.Nine)));
-                return nonBigTrump ?? cheapWin[0];
-            }
-
-            // Ne peut pas gagner : défausser le moins cher
-            return Discard(allowed);
-        }
-
-        // ── DÉFAUSSE (perdre au moindre coût) ───────────────────────────────
-        private Card Discard(List<Card> allowed)
-        {
-            // Priorité 5 — préserver les Dix
-            // Priorité 4 — préserver les As
-            // Priorité 3 — préserver les gros atouts
-            return allowed
-                .OrderBy(c => c.Value(_trump))        // moindre valeur d'abord
-                .ThenBy(c => c.Suit == _trump ? 1 : 0) // éviter atout si possible
-                .First();
+            var ctx = TrickContext.Build(player, allowedCards, currentTrick, _trump, _playedCards, _suitVoid);
+            return _selector.ChooseBestCard(ctx);
         }
 
         // ── MÉMOIRE ──────────────────────────────────────────────────────────
