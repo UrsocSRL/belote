@@ -81,21 +81,21 @@ public static class SceneBuilder
         var avNordBg = Pnl("AvatarNordBg", aiTopZ.transform, new Vector2(108,108), AMid, new Vector2(-380,10), C_PANLT);
                       Lbl("LblNord","Nord", avNordBg.transform, new Vector2(0,76), 20, C_AILBL, false);
         var avNord  = Img("AvatarNord", avNordBg.transform, Vector2.zero, new Vector2(96,96));
-        var aiTopH  = FanContainer("AITopHand", aiTopZ.transform, new Vector2(50,0), new Vector2(760,160), false, 60f, 14f, 24f);
+        var aiTopH  = FanContainer("AITopHand", aiTopZ.transform, new Vector2(50,0), new Vector2(760,160), false, 46f, 14f, 24f);
 
         // ── IA GAUCHE (Ouest) ──────────────────────────────────────────────────
         var aiLftZ  = Pnl("AILeftZone",  cvT, new Vector2(160,520), ALeft, new Vector2(90,0),  Color.clear);
         var avOuestBg = Pnl("AvatarOuestBg", aiLftZ.transform, new Vector2(108,108), AMid, new Vector2(0,225), C_PANLT);
                       Lbl("LblOuest","Ouest", avOuestBg.transform, new Vector2(0,76), 20, C_AILBL, false);
         var avOuest = Img("AvatarOuest", avOuestBg.transform, Vector2.zero, new Vector2(96,96));
-        var aiLftH  = FanContainer("AILeftHand", aiLftZ.transform, new Vector2(0,-60), new Vector2(140,400), true, 58f, 14f, 22f);
+        var aiLftH  = FanContainer("AILeftHand", aiLftZ.transform, new Vector2(0,-60), new Vector2(140,400), true, 44f, 14f, 22f);
 
         // ── IA DROITE (Est) ────────────────────────────────────────────────────
         var aiRgtZ  = Pnl("AIRightZone", cvT, new Vector2(160,520), ARight, new Vector2(-90,0), Color.clear);
         var avEstBg = Pnl("AvatarEstBg", aiRgtZ.transform, new Vector2(108,108), AMid, new Vector2(0,225), C_PANLT);
                       Lbl("LblEst","Est", avEstBg.transform, new Vector2(0,76), 20, C_AILBL, false);
         var avEst   = Img("AvatarEst", avEstBg.transform, Vector2.zero, new Vector2(96,96));
-        var aiRgtH  = FanContainer("AIRightHand", aiRgtZ.transform, new Vector2(0,-60), new Vector2(140,400), true, 58f, 14f, 22f);
+        var aiRgtH  = FanContainer("AIRightHand", aiRgtZ.transform, new Vector2(0,-60), new Vector2(140,400), true, 44f, 14f, 22f);
 
         // ── TABLE (4 slots) ────────────────────────────────────────────────────
         // table.png est un ovale "paysage" (plus large que haut). En portrait, on le
@@ -123,7 +123,7 @@ public static class SceneBuilder
 
         // ── MAIN JOUEUR (Sud) ──────────────────────────────────────────────────
         var handZ   = Pnl("HandZone", cvT, new Vector2(1080,320), ABot, new Vector2(0,160), Color.clear);
-        var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,300));
+        var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,300), false, 58f, 16f, 40f);
 
         // ── INFO BAR ───────────────────────────────────────────────────────────
         var infoP   = Pnl("InfoBar", cvT, new Vector2(790,50), ABot, new Vector2(0,356), C_PANLT);
@@ -311,7 +311,7 @@ public static class SceneBuilder
     static void MakeCardPrefab(string dir)
     {
         var root = new GameObject("CardPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(124,186);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(100,150);
         var bg   = root.AddComponent<Image>(); bg.color = Color.white;
         root.AddComponent<CanvasGroup>();
 
@@ -321,7 +321,7 @@ public static class SceneBuilder
 
         var lblGo = new GameObject("CardLabel"); lblGo.transform.SetParent(root.transform,false);
         var t = lblGo.AddComponent<Text>();
-        t.text = "A♠"; t.fontSize = 24; t.color = new Color(0.1f,0.1f,0.1f);
+        t.text = "A♠"; t.fontSize = 20; t.color = new Color(0.1f,0.1f,0.1f);
         t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         FillRT(lblGo.GetComponent<RectTransform>());
@@ -341,7 +341,7 @@ public static class SceneBuilder
     static void MakeCardBackPrefab(string dir)
     {
         var root = new GameObject("CardBackPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(108,162);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(88,132);
         var bg   = root.AddComponent<Image>(); bg.color = new Color(0.12f,0.25f,0.60f);
 
         var faceGo = new GameObject("CardFaceImage"); faceGo.transform.SetParent(root.transform,false);
@@ -358,7 +358,7 @@ public static class SceneBuilder
     static void MakeTrickCardPrefab(string dir)
     {
         var root = new GameObject("TrickCardPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(128,192);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(104,156);
         var bg   = root.AddComponent<Image>(); bg.color = Color.white;
         root.AddComponent<CanvasGroup>();
 
@@ -368,7 +368,7 @@ public static class SceneBuilder
 
         var lblGo = new GameObject("CardLabel"); lblGo.transform.SetParent(root.transform,false);
         var t = lblGo.AddComponent<Text>();
-        t.text = "A♠"; t.fontSize = 26; t.color = new Color(0.1f,0.1f,0.1f);
+        t.text = "A♠"; t.fontSize = 22; t.color = new Color(0.1f,0.1f,0.1f);
         t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         FillRT(lblGo.GetComponent<RectTransform>());
