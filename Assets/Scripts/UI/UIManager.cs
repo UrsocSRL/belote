@@ -111,6 +111,7 @@ namespace BeloteFreeze.UI
 
         public void OnDeal(Player[] players, Card trumpCard)
         {
+            EndPanel?.SetActive(false);
             for (int ai = 0; ai < 3; ai++)
                 if (AIHandContainers != null && ai < AIHandContainers.Length)
                     RenderAIBack(AIHandContainers[ai], players[ai + 1].Hand.Count);
