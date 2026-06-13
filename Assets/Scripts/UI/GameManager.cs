@@ -23,6 +23,11 @@ namespace BeloteFreeze.UI
         [Tooltip("Délai IA en secondes")]
         public float AIDelay = 0.6f;
 
+        [Header("Joueurs")]
+        [Tooltip("Nombre de joueurs humains sur la table (1 à 4). Les sièges restants sont occupés par des IA.")]
+        [Range(1, 4)]
+        public int HumanPlayerCount = 1;
+
         // ── Objets métier ─────────────────────────────────────────────────────
         private readonly Deck          _deck          = new();
         private readonly Player[]      _players       = new Player[4];
@@ -51,10 +56,22 @@ namespace BeloteFreeze.UI
 
         void InitPlayers()
         {
-            _players[0] = new Player(PlayerSeat.South, isHuman: true);
-            _players[1] = new Player(PlayerSeat.West,  isHuman: false);
-            _players[2] = new Player(PlayerSeat.North, isHuman: false);
-            _players[3] = new Player(PlayerSeat.East,  isHuman: false);
+            var isHuman = SeatAssignment.GetHumanSeats(HumanPlayerCount);
+            _players[0] = new Player(PlayerSeat.South, isHuman[0]);
+            _players[1] = new Player(PlayerSeat.West,  isHuman[1]);
+            _players[2] = new Player(PlayerSeat.North, isHuman[2]);
+            _players[3] = new Player(PlayerSeat.East,  isHuman[3]);
+        }
+
+        /// <summary>
+        /// Remplacement dynamique : un siège humain est repris par une IA sans
+        /// interrompre la partie. La main, le score (par équipe) et l'équipe
+        /// du siège sont conservés automatiquement (même objet Player).
+        /// </summary>
+        public void ReplaceSeatWithAI(int seat)
+        {
+            if (seat < 0 || seat >= _players.Length) return;
+            _players[seat].IsHuman = false;
         }
 
         // ── Nouvelle partie ───────────────────────────────────────────────────
