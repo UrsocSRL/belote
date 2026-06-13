@@ -34,6 +34,7 @@ namespace BeloteFreeze.AI
             // experte viendront s'insérer ici, dans l'ordre voulu.
             _selector = new CardSelector(new ICardSelectionRule[]
             {
+                new TakerOpenWithJackRule(),
                 new OpenTrumpWithoutJackRule(),
                 new LeadCardRule(),
                 new PartnerMasterRule(),
