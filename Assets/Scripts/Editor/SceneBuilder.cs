@@ -105,6 +105,11 @@ public static class SceneBuilder
         var tableImgGo = new GameObject("TableImage"); tableImgGo.transform.SetParent(tableZ.transform,false);
         var tableImgRt = tableImgGo.AddComponent<RectTransform>();
         FillRT(tableImgRt);
+        // Recentre l'ovale : table.png n'est pas centre dans son cadre (le
+        // dessin est decale vers le bas), ce qui, apres rotation de 90°,
+        // se traduit par un decalage visuel vers la gauche. On compense
+        // par un offset horizontal.
+        tableImgRt.anchoredPosition = new Vector2(24, 0);
         tableImgRt.localEulerAngles = new Vector3(0,0,90);
         var tableImg = tableImgGo.AddComponent<Image>(); tableImg.raycastTarget = false; tableImg.preserveAspect = true;
         var toc = tableZ.AddComponent<TableOrientationController>();

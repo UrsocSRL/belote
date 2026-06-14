@@ -31,7 +31,13 @@ namespace BeloteFreeze.UI
 
             _rt.sizeDelta = isLandscape ? LandscapeSize : PortraitSize;
             if (TableImage != null)
+            {
                 TableImage.localEulerAngles = new Vector3(0, 0, isLandscape ? 0f : 90f);
+                // En portrait, table.png est pivote de 90° ; comme le dessin
+                // n'est pas centre verticalement dans son cadre, la rotation
+                // se traduit par un decalage horizontal qu'on compense ici.
+                TableImage.anchoredPosition = new Vector2(isLandscape ? 0f : 24f, 0f);
+            }
 
             _lastLandscape = isLandscape;
             _initialized = true;
