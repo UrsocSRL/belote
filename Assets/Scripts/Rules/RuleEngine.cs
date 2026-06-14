@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 using BeloteFreeze.Core;
 
 namespace BeloteFreeze.Rules
@@ -37,26 +38,39 @@ namespace BeloteFreeze.Rules
             int partnerSeat = GetPartnerSeat(player.Seat);
             bool partnerIsMaster = currentWinner == partnerSeat;
 
+            List<Card> result;
             if (isTrumpLead)
             {
                 // Atout demandé
                 var myTrumps = player.GetTrumps(trump);
-                if (myTrumps.Count == 0) return new List<Card>(hand); // Pas d'atout : libre
-
-                // Cas 5 — Partenaire maître : pisse autorisée
-                if (partnerIsMaster) return new List<Card>(hand);
-
-                // Cas 3 — Surcoupe obligatoire sur adversaire maître
-                var highestTrump = GetHighestTrumpInTrick(currentTrick, trump);
-                if (highestTrump != null)
+                if (myTrumps.Count == 0)
                 {
-                    var overcuts = myTrumps.FindAll(c => c.TrumpOrder() > highestTrump.TrumpOrder());
-                    if (overcuts.Count > 0) return overcuts; // Cas 3
-
-                    // Cas 4 — Impossible de surcouper : jouer atout quand même
-                    return myTrumps;
+                    result = new List<Card>(hand); // Pas d'atout : libre
                 }
-                return myTrumps;
+                // Cas 1 — Fourniture obligatoire à l'atout : on a de l'atout, on DOIT
+                // en jouer, même si le partenaire est maître (cf. Cas 5 ci-dessous,
+                // qui ne dispense que de l'obligation de SURCOUPE, pas de fourniture).
+                else if (partnerIsMaster)
+                {
+                    // Cas 5 — Partenaire maître : pas de surcoupe obligatoire,
+                    // mais l'atout reste obligatoire (fourniture).
+                    result = myTrumps;
+                }
+                else
+                {
+                    // Cas 3 — Surcoupe obligatoire sur adversaire maître
+                    var highestTrump = GetHighestTrumpInTrick(currentTrick, trump);
+                    if (highestTrump != null)
+                    {
+                        var overcuts = myTrumps.FindAll(c => c.TrumpOrder() > highestTrump.TrumpOrder());
+                        // Cas 3 si surcoupe possible, sinon Cas 4 (atout quand même)
+                        result = overcuts.Count > 0 ? overcuts : myTrumps;
+                    }
+                    else
+                    {
+                        result = myTrumps;
+                    }
+                }
             }
             else
             {
@@ -64,30 +78,48 @@ namespace BeloteFreeze.Rules
 
                 // Cas 1 — Fourniture obligatoire
                 var mySuit = player.GetSuit(leadSuit);
-                if (mySuit.Count > 0) return mySuit;
-
-                // Pas de la couleur demandée
-                var myTrumps = player.GetTrumps(trump);
-                if (myTrumps.Count == 0) return new List<Card>(hand); // Pas d'atout : libre
-
-                // Cas 5 — Partenaire maître : pisse autorisée
-                if (partnerIsMaster) return new List<Card>(hand);
-
-                // Cas 2 — Coupe obligatoire / Cas 3 — Surcoupe obligatoire
-                var highestTrump = GetHighestTrumpInTrick(currentTrick, trump);
-                if (highestTrump != null)
+                if (mySuit.Count > 0)
                 {
-                    // Cas 3 — Surcoupe obligatoire sur adversaire maître
-                    var overcuts = myTrumps.FindAll(c => c.TrumpOrder() > highestTrump.TrumpOrder());
-                    if (overcuts.Count > 0) return overcuts;
-
-                    // Cas 4 — Impossible de surcouper : jouer atout quand même
-                    return myTrumps;
+                    result = mySuit;
                 }
-
-                // Cas 2 — Coupe obligatoire (pas encore d'atout dans le pli)
-                return myTrumps;
+                else
+                {
+                    // Pas de la couleur demandée
+                    var myTrumps = player.GetTrumps(trump);
+                    if (myTrumps.Count == 0)
+                    {
+                        result = new List<Card>(hand); // Pas d'atout : libre
+                    }
+                    else if (partnerIsMaster)
+                    {
+                        // Cas 5 — Partenaire maître : pisse autorisée (pas de coupe obligatoire)
+                        result = new List<Card>(hand);
+                    }
+                    else
+                    {
+                        // Cas 2 — Coupe obligatoire / Cas 3 — Surcoupe obligatoire
+                        var highestTrump = GetHighestTrumpInTrick(currentTrick, trump);
+                        if (highestTrump != null)
+                        {
+                            // Cas 3 — Surcoupe obligatoire sur adversaire maître
+                            var overcuts = myTrumps.FindAll(c => c.TrumpOrder() > highestTrump.TrumpOrder());
+                            // Cas 3 si surcoupe possible, sinon Cas 4 (atout quand même)
+                            result = overcuts.Count > 0 ? overcuts : myTrumps;
+                        }
+                        else
+                        {
+                            // Cas 2 — Coupe obligatoire (pas encore d'atout dans le pli)
+                            result = myTrumps;
+                        }
+                    }
+                }
             }
+
+            Debug.Log($"[RuleEngine] Joueur {player.Seat} | Couleur demandée : {leadSuit} | "
+                + $"Atouts en main : {player.GetTrumps(trump).Count} | "
+                + $"Cartes légales : [{string.Join(", ", result)}]");
+
+            return result;
         }
 
         /// <summary>
