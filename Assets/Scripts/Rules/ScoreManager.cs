@@ -17,10 +17,13 @@ namespace BeloteFreeze.Rules
         public RoundOutcome Outcome;
         public int PointsUs;
         public int PointsThem;
+        public int TrickPointsUs;
+        public int TrickPointsThem;
         public int EarnedUs;
         public int EarnedThem;
         public int PendingPoints;
         public bool BeloteRebelote;
+        public int BeloteTeam;
         public string Description;
     }
 
@@ -63,9 +66,12 @@ namespace BeloteFreeze.Rules
 
             var result = new RoundResult
             {
-                PointsUs       = pointsUs,
-                PointsThem     = pointsThem,
-                BeloteRebelote = beloteRebelote
+                PointsUs         = pointsUs,
+                PointsThem       = pointsThem,
+                TrickPointsUs    = trickPointsUs,
+                TrickPointsThem  = trickPointsThem,
+                BeloteRebelote   = beloteRebelote,
+                BeloteTeam       = beloteRebelote ? beloteTeam : -1
             };
 
             // 9.2 — Capot : les 8 plis remportés par la même équipe.

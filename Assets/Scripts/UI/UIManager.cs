@@ -263,7 +263,20 @@ namespace BeloteFreeze.UI
                     _                         => "Fin de manche"
                 };
             if (EndDetailsText != null)
-                EndDetailsText.text = result.Description + "\n\nTotal - Nous : " + totalUs + " | Eux : " + totalThem;
+            {
+                Suit trump = GameManager.Instance != null ? GameManager.Instance.State.Trump : default;
+                string belUs   = result.BeloteTeam == 0 ? "+20" : "-";
+                string belThem = result.BeloteTeam == 1 ? "+20" : "-";
+
+                EndDetailsText.text =
+                    "ATOUT " + SuitSymbol(trump) + " " + SuitName(trump) + "\n\n"
+                    + "              Nous     Eux\n"
+                    + "Belote      " + belUs.PadLeft(4) + "     " + belThem.PadLeft(4) + "\n"
+                    + "Points      " + result.TrickPointsUs.ToString().PadLeft(4) + "     " + result.TrickPointsThem.ToString().PadLeft(4) + "\n"
+                    + "Total       " + result.PointsUs.ToString().PadLeft(4) + "     " + result.PointsThem.ToString().PadLeft(4) + "\n\n"
+                    + result.Description
+                    + "\n\nScore total - Nous : " + totalUs + " | Eux : " + totalThem;
+            }
             if (ScoreUsText   != null) ScoreUsText.text   = totalUs.ToString();
             if (ScoreThemText != null) ScoreThemText.text = totalThem.ToString();
         }
