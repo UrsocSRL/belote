@@ -45,31 +45,19 @@ namespace BeloteFreeze.Rules
                 var myTrumps = player.GetTrumps(trump);
                 if (myTrumps.Count == 0)
                 {
-                    result = new List<Card>(hand); // Pas d'atout : libre
-                }
-                // Cas 1 — Fourniture obligatoire à l'atout : on a de l'atout, on DOIT
-                // en jouer, même si le partenaire est maître (cf. Cas 5 ci-dessous,
-                // qui ne dispense que de l'obligation de SURCOUPE, pas de fourniture).
-                else if (partnerIsMaster)
-                {
-                    // Cas 5 — Partenaire maître : pas de surcoupe obligatoire,
-                    // mais l'atout reste obligatoire (fourniture).
-                    result = myTrumps;
+                    // Règle 1 — pas d'atout en main : libre
+                    result = new List<Card>(hand);
                 }
                 else
                 {
-                    // Cas 3 — Surcoupe obligatoire sur adversaire maître
+                    // Règle 1 — fourniture obligatoire à l'atout (aucune exception
+                    // "partenaire maître" : celle-ci ne s'applique que lorsqu'on ne
+                    // possède pas la couleur demandée — Règle 2.1).
+                    // Règle 3 — on doit monter sur l'atout déjà sur le tapis si
+                    // possible, sinon on peut jouer un atout plus faible.
                     var highestTrump = GetHighestTrumpInTrick(currentTrick, trump);
-                    if (highestTrump != null)
-                    {
-                        var overcuts = myTrumps.FindAll(c => c.TrumpOrder() > highestTrump.TrumpOrder());
-                        // Cas 3 si surcoupe possible, sinon Cas 4 (atout quand même)
-                        result = overcuts.Count > 0 ? overcuts : myTrumps;
-                    }
-                    else
-                    {
-                        result = myTrumps;
-                    }
+                    var overcuts = myTrumps.FindAll(c => c.TrumpOrder() > highestTrump.TrumpOrder());
+                    result = overcuts.Count > 0 ? overcuts : myTrumps;
                 }
             }
             else
