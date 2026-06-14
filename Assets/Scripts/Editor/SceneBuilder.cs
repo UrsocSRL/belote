@@ -69,12 +69,12 @@ public static class SceneBuilder
         var bgImg = bgGo.AddComponent<Image>(); bgImg.raycastTarget = false; bgImg.preserveAspect = false;
 
         // ── SCORE ─────────────────────────────────────────────────────────────
-        var scoreP  = Pnl("ScorePanel", cvT, new Vector2(1080,90), ATop, new Vector2(0,-45), C_PANEL);
-        var tUs     = Lbl("ScoreUs",   "0",     scoreP.transform, new Vector2(-200,0),  34, C_WHITE, true);
-        var tThem   = Lbl("ScoreThem", "0",     scoreP.transform, new Vector2( 200,0),  34, C_WHITE, true);
-        var tTrump  = Lbl("TrumpInd",  "",      scoreP.transform, new Vector2(0, 16),   22, C_GOLD,  true);
-                      Lbl("LblNous","Nous",     scoreP.transform, new Vector2(-200,-28),18, new Color(.6f,.9f,.6f), false);
-                      Lbl("LblEux", "Eux",      scoreP.transform, new Vector2( 200,-28),18, new Color(.9f,.6f,.6f), false);
+        var scoreP  = Pnl("ScorePanel", cvT, new Vector2(230,130), ATopL, new Vector2(125,-70), C_PANEL);
+        var tUs     = Lbl("ScoreUs",   "0",     scoreP.transform, new Vector2(-50, 8),  28, C_WHITE, true);
+        var tThem   = Lbl("ScoreThem", "0",     scoreP.transform, new Vector2( 50, 8),  28, C_WHITE, true);
+        var tTrump  = Lbl("TrumpInd",  "",      scoreP.transform, new Vector2(0,-44),   14, C_GOLD,  true);
+                      Lbl("LblNous","Nous",     scoreP.transform, new Vector2(-50, 42), 18, new Color(.6f,.9f,.6f), false);
+                      Lbl("LblEux", "Eux",      scoreP.transform, new Vector2( 50, 42), 18, new Color(.9f,.6f,.6f), false);
 
         // ── IA HAUT (Nord) ─────────────────────────────────────────────────────
         var aiTopZ  = Pnl("AITopZone",  cvT, new Vector2(900,220), ATop, new Vector2(0,-165), Color.clear);
@@ -391,6 +391,7 @@ public static class SceneBuilder
 
     // ── Helpers UI ────────────────────────────────────────────────────────────
     static readonly Vector2 ATop   = new Vector2(0.5f,1f);
+    static readonly Vector2 ATopL  = new Vector2(0f,1f);
     static readonly Vector2 ABot   = new Vector2(0.5f,0f);
     static readonly Vector2 ABotL  = new Vector2(0f,0f);
     static readonly Vector2 ALeft  = new Vector2(0f,0.5f);
