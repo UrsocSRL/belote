@@ -134,8 +134,8 @@ public static class SceneBuilder
                           new Vector2(180,50), ABotL, new Vector2(98,356), C_PANLT);
 
         // ── PANNEAU DERNIER PLI ────────────────────────────────────────────────
-        var lpPnl   = Pnl("LastTrickPanel", cvT, new Vector2(560,210), AMid, Vector2.zero, C_PANEL);
-        var tLPTxt  = Lbl("LastTrickText","", lpPnl.transform, Vector2.zero, 18, C_WHITE, false);
+        var lpPnl   = Pnl("LastTrickPanel", cvT, new Vector2(300,260), ABotL, new Vector2(160,180), C_PANEL);
+        var tLPTxt  = Lbl("LastTrickText","", lpPnl.transform, Vector2.zero, 16, C_WHITE, false);
         lpPnl.SetActive(false);
 
         // ── PANNEAU PRISE D'ATOUT ──────────────────────────────────────────────
@@ -166,7 +166,7 @@ public static class SceneBuilder
         endPnl.SetActive(false);
         var tEndTi  = Lbl("EndTitle",   "Fin de manche", endPnl.transform, new Vector2(0,190), 30, C_GOLD,  true);
         var tEndDt  = Lbl("EndDetails", "",              endPnl.transform, new Vector2(0, 30), 18, C_WHITE, false);
-        var nextBt  = Btn("NextBtn", endPnl.transform, "Nouvelle manche",
+        var nextBt  = Btn("NextBtn", endPnl.transform, "Continuer",
                           new Vector2(330,64), AMid, new Vector2(0,-202), C_BTNGRN);
 
         // ── PANNEAU MESSAGE FLASH ──────────────────────────────────────────────
