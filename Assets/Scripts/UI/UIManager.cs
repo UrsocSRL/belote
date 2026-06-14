@@ -139,8 +139,9 @@ namespace BeloteFreeze.UI
         public void OnTrumpAsk(int askerSeat, TrumpPhase phase, Card trumpCard)
         {
             TrumpPanel?.SetActive(true);
-            if (TrumpCardText != null) TrumpCardText.text = trumpCard.ToString();
+            if (TrumpCardText != null) TrumpCardText.gameObject.SetActive(false);
             ShowTurnedCard(trumpCard);
+            SetInfoBar("");
             if (askerSeat == 0)
             {
                 if (phase == TrumpPhase.Round1)
@@ -174,7 +175,7 @@ namespace BeloteFreeze.UI
         {
             TrumpPanel?.SetActive(false);
             HideTurnedCard();
-            if (TrumpIndicatorText != null) TrumpIndicatorText.text = "ATOUT " + SuitSymbol(trump) + " " + SuitName(trump);
+            if (TrumpIndicatorText != null) TrumpIndicatorText.text = PlayerName(takerSeat) + " a pris : " + SuitSymbol(trump) + " " + SuitName(trump);
             SetInfoBar(PlayerName(takerSeat) + " prend a " + SuitSymbol(trump));
         }
 

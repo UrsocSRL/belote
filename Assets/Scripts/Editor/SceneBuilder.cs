@@ -144,7 +144,7 @@ public static class SceneBuilder
         lpPnl.SetActive(false);
 
         // ── PANNEAU PRISE D'ATOUT ──────────────────────────────────────────────
-        var tPnl    = Pnl("TrumpPanel", cvT, new Vector2(560,380), AMid, Vector2.zero, C_PANEL);
+        var tPnl    = Pnl("TrumpPanel", cvT, new Vector2(560,460), AMid, Vector2.zero, C_PANEL);
         tPnl.SetActive(false);
         var tTitle  = Lbl("TrumpTitle",   "Prendre ?", tPnl.transform, new Vector2(0, 135), 24, C_WHITE, true);
         var tCrdTxt = Lbl("TrumpCardTxt", "A♠",        tPnl.transform, new Vector2(0,  50), 48, C_BLKSUIT, true);
@@ -153,7 +153,7 @@ public static class SceneBuilder
         var passBt  = Btn("PassBtn", tPnl.transform, "Passer",
                           new Vector2(200,60), AMid, new Vector2( 108,-58), C_BTNRED);
 
-        var suitCt  = Pnl("SuitContainer", tPnl.transform, new Vector2(490,76), AMid, new Vector2(0,-110), Color.clear);
+        var suitCt  = Pnl("SuitContainer", tPnl.transform, new Vector2(490,76), AMid, new Vector2(0,-180), Color.clear);
         suitCt.SetActive(false);
         var suitBtns = new Button[4];
         string[] sym = {"♠","♥","♦","♣"};
