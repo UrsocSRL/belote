@@ -128,7 +128,7 @@ public static class SceneBuilder
 
         // ── MAIN JOUEUR (Sud) ──────────────────────────────────────────────────
         var handZ   = Pnl("HandZone", cvT, new Vector2(1080,320), ABot, new Vector2(0,160), Color.clear);
-        var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,300), false, 58f, 16f, 40f);
+        var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,300), false, 50f, 16f, 40f);
 
         // ── INFO BAR ───────────────────────────────────────────────────────────
         var infoP   = Pnl("InfoBar", cvT, new Vector2(790,50), ABot, new Vector2(0,356), C_PANLT);
@@ -321,7 +321,7 @@ public static class SceneBuilder
     static void MakeCardPrefab(string dir)
     {
         var root = new GameObject("CardPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(100,150);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(85,128);
         var bg   = root.AddComponent<Image>(); bg.color = Color.white;
         root.AddComponent<CanvasGroup>();
 
@@ -331,7 +331,7 @@ public static class SceneBuilder
 
         var lblGo = new GameObject("CardLabel"); lblGo.transform.SetParent(root.transform,false);
         var t = lblGo.AddComponent<Text>();
-        t.text = "A♠"; t.fontSize = 20; t.color = new Color(0.1f,0.1f,0.1f);
+        t.text = "A♠"; t.fontSize = 17; t.color = new Color(0.1f,0.1f,0.1f);
         t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         FillRT(lblGo.GetComponent<RectTransform>());
@@ -351,7 +351,7 @@ public static class SceneBuilder
     static void MakeCardBackPrefab(string dir)
     {
         var root = new GameObject("CardBackPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(88,132);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(75,113);
         var bg   = root.AddComponent<Image>(); bg.color = new Color(0.12f,0.25f,0.60f);
 
         var faceGo = new GameObject("CardFaceImage"); faceGo.transform.SetParent(root.transform,false);
@@ -368,7 +368,7 @@ public static class SceneBuilder
     static void MakeTrickCardPrefab(string dir)
     {
         var root = new GameObject("TrickCardPrefab");
-        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(104,156);
+        var rt   = root.AddComponent<RectTransform>(); rt.sizeDelta = new Vector2(88,132);
         var bg   = root.AddComponent<Image>(); bg.color = Color.white;
         root.AddComponent<CanvasGroup>();
 
@@ -378,7 +378,7 @@ public static class SceneBuilder
 
         var lblGo = new GameObject("CardLabel"); lblGo.transform.SetParent(root.transform,false);
         var t = lblGo.AddComponent<Text>();
-        t.text = "A♠"; t.fontSize = 22; t.color = new Color(0.1f,0.1f,0.1f);
+        t.text = "A♠"; t.fontSize = 19; t.color = new Color(0.1f,0.1f,0.1f);
         t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         FillRT(lblGo.GetComponent<RectTransform>());
