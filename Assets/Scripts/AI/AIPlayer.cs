@@ -40,6 +40,7 @@ namespace BeloteFreeze.AI
                 new OpenTrumpWithoutJackRule(),
                 new DefenderOpeningRule(),
                 new LeadCardRule(),
+                new DefenderAceTakeRule(),
                 new PartnerMasterRule(),
                 new OpponentMasterRule(),
                 new DefaultDiscardRule(), // toujours applicable — garantit un retour
