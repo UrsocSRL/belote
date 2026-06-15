@@ -14,8 +14,8 @@ public static class SceneBuilder
     static readonly Color C_BG      = new Color(0.08f,0.36f,0.16f);
     static readonly Color C_PANEL   = new Color(0f,0f,0f,0.75f);
     static readonly Color C_PANLT   = new Color(0f,0f,0f,0.48f);
-    static readonly Color C_BTNGRN  = new Color(0.17f,0.50f,0.17f);
-    static readonly Color C_BTNRED  = new Color(0.55f,0.15f,0.15f);
+    static readonly Color C_BTNGRN  = new Color(0.22f,0.64f,0.29f);
+    static readonly Color C_BTNRED  = new Color(0.78f,0.22f,0.22f);
     static readonly Color C_WHITE   = Color.white;
     static readonly Color C_GOLD    = new Color(1f,0.84f,0f);
     static readonly Color C_BACK    = new Color(0.12f,0.25f,0.60f);
@@ -149,9 +149,14 @@ public static class SceneBuilder
         var tTitle  = Lbl("TrumpTitle",   "Prendre ?", tPnl.transform, new Vector2(0, 135), 24, C_WHITE, true);
         var tCrdTxt = Lbl("TrumpCardTxt", "A♠",        tPnl.transform, new Vector2(0,  50), 48, C_BLKSUIT, true);
         var takeBt  = Btn("TakeBtn", tPnl.transform, "Prendre",
-                          new Vector2(200,60), AMid, new Vector2(-108,-58), C_BTNGRN);
+                          new Vector2(210,70), AMid, new Vector2(-112,-58), C_BTNGRN);
         var passBt  = Btn("PassBtn", tPnl.transform, "Passer",
-                          new Vector2(200,60), AMid, new Vector2( 108,-58), C_BTNRED);
+                          new Vector2(210,70), AMid, new Vector2( 112,-58), C_BTNRED);
+        foreach (var b in new[]{ takeBt, passBt })
+        {
+            var lblT = b.GetComponentInChildren<Text>();
+            if (lblT) lblT.fontSize = 26;
+        }
 
         var suitCt  = Pnl("SuitContainer", tPnl.transform, new Vector2(490,76), AMid, new Vector2(0,-180), Color.clear);
         suitCt.SetActive(false);
@@ -428,7 +433,10 @@ public static class SceneBuilder
         var go = new GameObject(name); go.transform.SetParent(parent,false);
         var rt = go.AddComponent<RectTransform>();
         rt.anchorMin = rt.anchorMax = anchor; rt.anchoredPosition = pos; rt.sizeDelta = size;
-        go.AddComponent<Image>().color = col;
+        var img = go.AddComponent<Image>();
+        img.color  = col;
+        img.sprite = EnsureRoundedSprite();
+        img.type   = Image.Type.Sliced;
         go.AddComponent<Button>();
         var tGo = new GameObject("Label"); tGo.transform.SetParent(go.transform,false);
         FillRT(tGo.AddComponent<RectTransform>());
@@ -437,6 +445,44 @@ public static class SceneBuilder
         t.alignment = TextAnchor.MiddleCenter; t.fontStyle = FontStyle.Bold;
         t.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         return go;
+    }
+
+    /// <summary>
+    /// Genere (une seule fois) un sprite de rectangle a coins arrondis,
+    /// utilise comme fond 9-slice pour tous les boutons.
+    /// </summary>
+    static Sprite EnsureRoundedSprite()
+    {
+        const string path = "Assets/Art/UI/ui_button_round.png";
+        const int    size   = 64;
+        const int    radius = 20;
+
+        if (!AssetDatabase.IsValidFolder("Assets/Art/UI"))
+            AssetDatabase.CreateFolder("Assets/Art","UI");
+
+        if (!System.IO.File.Exists(path))
+        {
+            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                int cx = Mathf.Clamp(x, radius, size-1-radius);
+                int cy = Mathf.Clamp(y, radius, size-1-radius);
+                float dist = Vector2.Distance(new Vector2(x,y), new Vector2(cx,cy));
+                tex.SetPixel(x, y, new Color(1f,1f,1f, dist <= radius ? 1f : 0f));
+            }
+            tex.Apply();
+            System.IO.File.WriteAllBytes(path, tex.EncodeToPNG());
+            AssetDatabase.ImportAsset(path);
+
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            importer.textureType  = TextureImporterType.Sprite;
+            importer.spriteBorder = new Vector4(radius,radius,radius,radius);
+            importer.filterMode   = FilterMode.Bilinear;
+            importer.SaveAndReimport();
+        }
+
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
     }
 
     static GameObject FanContainer(string name, Transform parent, Vector2 pos, Vector2 size,
