@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using BeloteFreeze.Core;
 using BeloteFreeze.Rules;
@@ -198,11 +199,25 @@ namespace BeloteFreeze.UI
 
                 Debug.Log($"[Belote] Pli {_trickMgr.TrickCount + 1} — Meneur : {_players[leader].Name}");
 
+                // Dernier pli : si chaque joueur n'a plus qu'une seule carte,
+                // il n'y a plus de décision possible -> on joue tout automatiquement.
+                bool lastTrickAuto = _players.All(p => p.Hand.Count == 1);
+
                 // 4 joueurs jouent dans l'ordre
                 for (int i = 0; i < 4; i++)
                 {
                     int seat = (leader + i) % 4;
                     State.CurrentPlayerSeat = seat;
+
+                    if (lastTrickAuto)
+                    {
+                        yield return new WaitForSeconds(AIDelay);
+                        var ok   = _trickMgr.GetAllowedCards(_players[seat]);
+                        var card = ok[0];
+                        ExecutePlay(seat, card);
+                        continue;
+                    }
+
                     UIManager?.OnPlayerTurn(seat);
 
                     if (_players[seat].IsHuman)
