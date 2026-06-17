@@ -60,6 +60,11 @@ public static class SceneBuilder
         // sans changer la disposition relative.
         sc.referenceResolution = new Vector2(540, 960);
         sc.matchWidthOrHeight  = 0.5f;
+        // Mode Shrink : en paysage (ou tout ecran dont le ratio differe de 9:16),
+        // toute la composition (pensee en portrait) reste visible sans etre
+        // coupee ni deformee — elle est simplement reduite et centree, avec
+        // des bandes laterales comblees par le fond.
+        sc.screenMatchMode     = CanvasScaler.ScreenMatchMode.Shrink;
         cvGo.AddComponent<GraphicRaycaster>();
         var cvT = cvGo.transform;
 
