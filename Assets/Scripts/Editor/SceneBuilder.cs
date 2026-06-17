@@ -68,13 +68,27 @@ public static class SceneBuilder
         cvGo.AddComponent<GraphicRaycaster>();
         var cvT = cvGo.transform;
 
-        // ── DECOR : ARRIERE-PLAN ─────────────────────────────────────────────────
+        // ── DECOR : ARRIERE-PLAN (couvre tout l'ecran, meme en paysage) ─────────
         var bgGo  = new GameObject("Background"); bgGo.transform.SetParent(cvT,false);
         FillRT(bgGo.AddComponent<RectTransform>());
         var bgImg = bgGo.AddComponent<Image>(); bgImg.raycastTarget = false; bgImg.preserveAspect = false;
 
+        // ── UIROOT : conteneur a aspect fixe (9:16) ──────────────────────────────
+        // Toute la composition est pensee pour ce ratio. UIRoot se redimensionne
+        // pour toujours tenir entierement dans l'ecran (portrait OU paysage) sans
+        // jamais etre coupee ni deformee — l'arriere-plan comble le reste (bandes
+        // laterales en paysage).
+        var uiRootGo = new GameObject("UIRoot"); uiRootGo.transform.SetParent(cvT,false);
+        var uiRootRt = uiRootGo.AddComponent<RectTransform>();
+        uiRootRt.anchorMin = Vector2.zero; uiRootRt.anchorMax = Vector2.one;
+        uiRootRt.offsetMin = uiRootRt.offsetMax = Vector2.zero;
+        var fitter = uiRootGo.AddComponent<AspectRatioFitter>();
+        fitter.aspectMode  = AspectRatioFitter.AspectMode.FitInParent;
+        fitter.aspectRatio = 540f/960f;
+        var uiRoot = uiRootGo.transform;
+
         // ── SCORE ─────────────────────────────────────────────────────────────
-        var scoreP  = Pnl("ScorePanel", cvT, new Vector2(230,130), ATopL, new Vector2(125,-70), C_PANEL);
+        var scoreP  = Pnl("ScorePanel", uiRoot, new Vector2(230,130), ATopL, new Vector2(125,-70), C_PANEL);
         var tUs     = Lbl("ScoreUs",   "0",     scoreP.transform, new Vector2(-50, 8),  28, C_WHITE, true);
         var tThem   = Lbl("ScoreThem", "0",     scoreP.transform, new Vector2( 50, 8),  28, C_WHITE, true);
         var tTrump  = Lbl("TrumpInd",  "",      scoreP.transform, new Vector2(0,-44),   14, C_GOLD,  true);
@@ -82,21 +96,21 @@ public static class SceneBuilder
                       Lbl("LblEux", "Eux",      scoreP.transform, new Vector2( 50, 42), 18, new Color(.9f,.6f,.6f), false);
 
         // ── IA HAUT (Nord) ─────────────────────────────────────────────────────
-        var aiTopZ  = Pnl("AITopZone",  cvT, new Vector2(900,220), ATop, new Vector2(0,-165), Color.clear);
+        var aiTopZ  = Pnl("AITopZone",  uiRoot, new Vector2(900,220), ATop, new Vector2(0,-165), Color.clear);
         var avNordBg = Pnl("AvatarNordBg", aiTopZ.transform, new Vector2(108,108), AMid, new Vector2(-380,10), C_PANLT);
                       Lbl("LblNord","Nord", avNordBg.transform, new Vector2(0,76), 20, C_AILBL, false);
         var avNord  = Img("AvatarNord", avNordBg.transform, Vector2.zero, new Vector2(96,96));
         var aiTopH  = FanContainer("AITopHand", aiTopZ.transform, new Vector2(50,0), new Vector2(760,160), false, 46f, 14f, 24f);
 
         // ── IA GAUCHE (Ouest) ──────────────────────────────────────────────────
-        var aiLftZ  = Pnl("AILeftZone",  cvT, new Vector2(160,520), ALeft, new Vector2(90,0),  Color.clear);
+        var aiLftZ  = Pnl("AILeftZone",  uiRoot, new Vector2(160,520), ALeft, new Vector2(90,0),  Color.clear);
         var avOuestBg = Pnl("AvatarOuestBg", aiLftZ.transform, new Vector2(108,108), AMid, new Vector2(0,225), C_PANLT);
                       Lbl("LblOuest","Ouest", avOuestBg.transform, new Vector2(0,76), 20, C_AILBL, false);
         var avOuest = Img("AvatarOuest", avOuestBg.transform, Vector2.zero, new Vector2(96,96));
         var aiLftH  = FanContainer("AILeftHand", aiLftZ.transform, new Vector2(0,-60), new Vector2(140,400), true, 44f, 14f, 22f);
 
         // ── IA DROITE (Est) ────────────────────────────────────────────────────
-        var aiRgtZ  = Pnl("AIRightZone", cvT, new Vector2(160,520), ARight, new Vector2(-90,0), Color.clear);
+        var aiRgtZ  = Pnl("AIRightZone", uiRoot, new Vector2(160,520), ARight, new Vector2(-90,0), Color.clear);
         var avEstBg = Pnl("AvatarEstBg", aiRgtZ.transform, new Vector2(108,108), AMid, new Vector2(0,225), C_PANLT);
                       Lbl("LblEst","Est", avEstBg.transform, new Vector2(0,76), 20, C_AILBL, false);
         var avEst   = Img("AvatarEst", avEstBg.transform, Vector2.zero, new Vector2(96,96));
@@ -106,7 +120,7 @@ public static class SceneBuilder
         // table.png est un ovale "paysage" (plus large que haut). En portrait, on le
         // pivote de 90° pour obtenir un ovale "portrait" aligné avec la disposition
         // Nord/Sud/Est/Ouest des joueurs.
-        var tableZ  = Pnl("TableZone", cvT, new Vector2(560,680), AMid, new Vector2(0,30), Color.clear);
+        var tableZ  = Pnl("TableZone", uiRoot, new Vector2(560,680), AMid, new Vector2(0,30), Color.clear);
         var tableImgGo = new GameObject("TableImage"); tableImgGo.transform.SetParent(tableZ.transform,false);
         var tableImgRt = tableImgGo.AddComponent<RectTransform>();
         FillRT(tableImgRt);
@@ -132,19 +146,19 @@ public static class SceneBuilder
         turnedRt.sizeDelta = new Vector2(128,192);
 
         // ── MAIN JOUEUR (Sud) ──────────────────────────────────────────────────
-        var handZ   = Pnl("HandZone", cvT, new Vector2(1080,320), ABot, new Vector2(0,160), Color.clear);
+        var handZ   = Pnl("HandZone", uiRoot, new Vector2(1080,320), ABot, new Vector2(0,160), Color.clear);
         var humanH  = FanContainer("HumanHand", handZ.transform, new Vector2(0,-20), new Vector2(1040,300), false, 50f, 16f, 40f);
 
         // ── INFO BAR ───────────────────────────────────────────────────────────
-        var infoP   = Pnl("InfoBar", cvT, new Vector2(790,50), ABot, new Vector2(0,356), C_PANLT);
+        var infoP   = Pnl("InfoBar", uiRoot, new Vector2(790,50), ABot, new Vector2(0,356), C_PANLT);
         var tInfo   = Lbl("InfoBarText","A vous de jouer", infoP.transform, Vector2.zero, 20, C_WHITE, false);
 
         // ── BOUTON DERNIER PLI ─────────────────────────────────────────────────
-        var lastBt  = Btn("LastTrickBtn", cvT, "Dernier pli",
+        var lastBt  = Btn("LastTrickBtn", uiRoot, "Dernier pli",
                           new Vector2(180,50), ABotL, new Vector2(98,356), C_PANLT);
 
         // ── PANNEAU DERNIER PLI ────────────────────────────────────────────────
-        var lpPnl   = Pnl("LastTrickPanel", cvT, new Vector2(320,340), ABotL, new Vector2(170,210), C_PANEL);
+        var lpPnl   = Pnl("LastTrickPanel", uiRoot, new Vector2(320,340), ABotL, new Vector2(170,210), C_PANEL);
         var tLPTit  = Lbl("LastTrickTitle","Dernier pli", lpPnl.transform, new Vector2(0,142), 18, C_GOLD, true);
         var lpSlotS = Slot("LP_Sud",   lpPnl.transform, new Vector2(   0,-80));
         var lpSlotO = Slot("LP_Ouest", lpPnl.transform, new Vector2( -78,  0));
@@ -153,7 +167,7 @@ public static class SceneBuilder
         lpPnl.SetActive(false);
 
         // ── PANNEAU PRISE D'ATOUT ──────────────────────────────────────────────
-        var tPnl    = Pnl("TrumpPanel", cvT, new Vector2(560,460), AMid, Vector2.zero, C_PANEL);
+        var tPnl    = Pnl("TrumpPanel", uiRoot, new Vector2(560,460), AMid, Vector2.zero, C_PANEL);
         tPnl.SetActive(false);
         var tTitle  = Lbl("TrumpTitle",   "Prendre ?", tPnl.transform, new Vector2(0, 135), 24, C_WHITE, true);
         var tCrdTxt = Lbl("TrumpCardTxt", "A♠",        tPnl.transform, new Vector2(0,  50), 48, C_BLKSUIT, true);
@@ -181,7 +195,7 @@ public static class SceneBuilder
         }
 
         // ── PANNEAU FIN DE MANCHE ──────────────────────────────────────────────
-        var endPnl  = Pnl("EndPanel", cvT, new Vector2(660,550), AMid, Vector2.zero, C_PANEL);
+        var endPnl  = Pnl("EndPanel", uiRoot, new Vector2(660,550), AMid, Vector2.zero, C_PANEL);
         endPnl.SetActive(false);
         var tEndTi  = Lbl("EndTitle",   "Fin de manche", endPnl.transform, new Vector2(0,190), 30, C_GOLD,  true);
         var tEndDt  = Lbl("EndDetails", "",              endPnl.transform, new Vector2(0, 30), 18, C_WHITE, false);
@@ -189,12 +203,12 @@ public static class SceneBuilder
                           new Vector2(330,64), AMid, new Vector2(0,-202), C_BTNGRN);
 
         // ── PANNEAU MESSAGE FLASH ──────────────────────────────────────────────
-        var msgPnl  = Pnl("MsgPanel", cvT, new Vector2(660,120), AMid, new Vector2(0,100), C_PANEL);
+        var msgPnl  = Pnl("MsgPanel", uiRoot, new Vector2(660,120), AMid, new Vector2(0,100), C_PANEL);
         msgPnl.SetActive(false);
         var tMsg    = Lbl("MsgText","", msgPnl.transform, Vector2.zero, 22, C_WHITE, false);
 
         // ── PANNEAU BELOTE/REBELOTE ────────────────────────────────────────────
-        var belPnl  = Pnl("BelotePanel", cvT, new Vector2(450,92), AMid, new Vector2(0,215), new Color(1f,0.84f,0f,0.96f));
+        var belPnl  = Pnl("BelotePanel", uiRoot, new Vector2(450,92), AMid, new Vector2(0,215), new Color(1f,0.84f,0f,0.96f));
         belPnl.SetActive(false);
         var tBel    = Lbl("BeloteText","Belote !", belPnl.transform, Vector2.zero, 26, C_BLKSUIT, true);
 
