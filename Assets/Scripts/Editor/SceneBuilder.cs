@@ -139,8 +139,12 @@ public static class SceneBuilder
                           new Vector2(180,50), ABotL, new Vector2(98,356), C_PANLT);
 
         // ── PANNEAU DERNIER PLI ────────────────────────────────────────────────
-        var lpPnl   = Pnl("LastTrickPanel", cvT, new Vector2(300,260), ABotL, new Vector2(160,180), C_PANEL);
-        var tLPTxt  = Lbl("LastTrickText","", lpPnl.transform, Vector2.zero, 16, C_WHITE, false);
+        var lpPnl   = Pnl("LastTrickPanel", cvT, new Vector2(320,340), ABotL, new Vector2(170,210), C_PANEL);
+        var tLPTit  = Lbl("LastTrickTitle","Dernier pli", lpPnl.transform, new Vector2(0,142), 18, C_GOLD, true);
+        var lpSlotS = Slot("LP_Sud",   lpPnl.transform, new Vector2(   0,-80));
+        var lpSlotO = Slot("LP_Ouest", lpPnl.transform, new Vector2( -78,  0));
+        var lpSlotN = Slot("LP_Nord",  lpPnl.transform, new Vector2(   0, 80));
+        var lpSlotE = Slot("LP_Est",   lpPnl.transform, new Vector2(  78,  0));
         lpPnl.SetActive(false);
 
         // ── PANNEAU PRISE D'ATOUT ──────────────────────────────────────────────
@@ -230,7 +234,7 @@ public static class SceneBuilder
         uim.InfoBarText          = tInfo;
         uim.LastTrickButton      = lastBt.GetComponent<Button>();
         uim.LastTrickPanel       = lpPnl;
-        uim.LastTrickText        = tLPTxt;
+        uim.LastTrickSlots       = new Transform[]{ lpSlotS.transform, lpSlotO.transform, lpSlotN.transform, lpSlotE.transform };
         uim.TurnedCardSlot       = turnedRt;
 
         // ── DECOR / ART ────────────────────────────────────────────────────────

@@ -52,9 +52,9 @@ namespace BeloteFreeze.UI
 
         [Header("Info")]
         public Text       InfoBarText;
-        public Button     LastTrickButton;
-        public GameObject LastTrickPanel;
-        public Text       LastTrickText;
+        public Button      LastTrickButton;
+        public GameObject  LastTrickPanel;
+        public Transform[] LastTrickSlots; // [0]=Sud [1]=Ouest [2]=Nord [3]=Est
 
         [Header("Table — Carte retournée")]
         public Transform  TurnedCardSlot;
@@ -300,15 +300,29 @@ namespace BeloteFreeze.UI
         void ShowLastTrick()
         {
             if (_lastTrickData == null || _lastTrickData.Count == 0) return;
-            var sb = new StringBuilder();
-            foreach (var p in _lastTrickData) sb.AppendLine(PlayerName(p.PlayerSeat) + " : " + p.Card);
-            if (LastTrickPanel)
+
+            if (!LastTrickPanel || LastTrickSlots == null)
             {
-                LastTrickPanel.SetActive(true);
-                if (LastTrickText != null) LastTrickText.text = sb.ToString().TrimEnd();
-                StartCoroutine(HideAfter(LastTrickPanel, 2.5f));
+                var sb = new StringBuilder();
+                foreach (var p in _lastTrickData) sb.AppendLine(PlayerName(p.PlayerSeat) + " : " + p.Card);
+                ShowMessage("Dernier pli :\n" + sb, 2.5f);
+                return;
             }
-            else ShowMessage("Dernier pli :\n" + sb, 2.5f);
+
+            foreach (var slot in LastTrickSlots) if (slot) foreach (Transform c in slot) Destroy(c.gameObject);
+
+            Suit trump = GameManager.Instance != null ? GameManager.Instance.State.Trump : default;
+            var prefab = TrickCardPrefab ? TrickCardPrefab : CardPrefab;
+            foreach (var p in _lastTrickData)
+            {
+                if (p.PlayerSeat >= LastTrickSlots.Length || !LastTrickSlots[p.PlayerSeat] || !prefab) continue;
+                var go = Instantiate(prefab, LastTrickSlots[p.PlayerSeat]);
+                var cv = go.GetComponent<CardView>();
+                if (cv != null) { cv.SetCard(p.Card, trump); cv.SetPlayable(false); }
+            }
+
+            LastTrickPanel.SetActive(true);
+            StartCoroutine(HideAfter(LastTrickPanel, 2.5f));
         }
 
         void RenderHumanHand(List<Card> hand)
