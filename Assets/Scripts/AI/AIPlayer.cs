@@ -38,6 +38,7 @@ namespace BeloteFreeze.AI
                 new TakerContinueTrumpChaseRule(),
                 new TakerFullTrumpControlRule(),
                 new OpenTrumpWithoutJackRule(),
+                new PartnerStartsTrumpChaseRule(),
                 new DefenderOpeningRule(),
                 new LeadCardRule(),
                 new DefenderAceTakeRule(),
